@@ -1,120 +1,80 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useQuery } from '@tanstack/react-query'
+import { SummaryCards } from '@/components/SummaryCards'
+import { RevenueChart } from '@/components/RevenueChart'
+import { TransactionsTable } from '@/components/TransactionsTable'
+import { mockTransactions, mockMonthlySummary } from '@/data/mockData'
 
-function App() {
-  const [count, setCount] = useState(0)
+// Simulated async data fetchers
+const fetchTransactions = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  return mockTransactions
+}
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+const fetchMonthlySummary = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  return mockMonthlySummary
+}
+
+export function App() {
+  const {
+    data: transactions,
+    isLoading: transactionsLoading,
+    error: transactionsError,
+  } = useQuery({
+    queryKey: ['transactions'],
+    queryFn: fetchTransactions,
+  })
+
+  const {
+    data: monthlySummary,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useQuery({
+    queryKey: ['monthly'],
+    queryFn: fetchMonthlySummary,
+  })
+
+  if (transactionsError || summaryError) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600">Error loading data</h1>
+          <p className="text-muted-foreground">
+            Please try again later.
           </p>
         </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </div>
+    )
+  }
 
-      <div className="ticks"></div>
+  const isLoading = transactionsLoading || summaryLoading
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+  return (
+    <div className="min-h-screen bg-background p-6 md:p-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold tracking-tight">Finance Report</h1>
+          <p className="mt-2 text-muted-foreground">
+            Overview of your revenue, expenses, and transactions
+          </p>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              <p className="text-muted-foreground">Loading data...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {transactions && <SummaryCards transactions={transactions} />}
+            {monthlySummary && <RevenueChart data={monthlySummary} />}
+            {transactions && <TransactionsTable transactions={transactions} />}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
