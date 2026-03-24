@@ -39,8 +39,21 @@ function getDisplayCategory(key: string, type: 'income' | 'expense'): string {
   return key.replace(`-${type}`, '')
 }
 
+export function calculateTotalOpening(cashSources: CashSource[]): number {
+  return cashSources.reduce((sum, source) => sum + source.openingBalance, 0)
+}
+
+export function calculateTotalClosing(cashSources: CashSource[]): number {
+  return cashSources.reduce((sum, source) => sum + source.closingBalance, 0)
+}
+
+export function calculateNetCashChange(cashSources: CashSource[]): number {
+  return calculateTotalClosing(cashSources) - calculateTotalOpening(cashSources)
+}
+
 export function calculateTotalCashPosition(cashSources: CashSource[]): number {
-  return cashSources.reduce((sum, source) => sum + source.balance, 0)
+  // For backwards compatibility, returns closing balance
+  return calculateTotalClosing(cashSources)
 }
 
 export function getTransactionsByQuarter(

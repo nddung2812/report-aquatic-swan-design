@@ -1,7 +1,8 @@
 export interface CashSource {
   id: 'paypal' | 'stripe' | 'commbank_transaction' | 'commbank_saver'
   label: string
-  balance: number
+  openingBalance: number
+  closingBalance: number
 }
 
 export interface Transaction {

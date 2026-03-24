@@ -52,13 +52,18 @@ export function App() {
             {/* Cash Sources Summary */}
             <div className="rounded-lg border bg-card p-4">
               <h3 className="text-sm font-medium">Cash Sources Entered</h3>
-              <div className="mt-3 grid gap-2 md:grid-cols-4">
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
                 {cashSources.map((source) => (
-                  <div key={source.id} className="rounded bg-muted p-2">
-                    <p className="text-xs text-muted-foreground">{source.label}</p>
-                    <p className="text-sm font-semibold">
-                      ${source.balance.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </p>
+                  <div key={source.id} className="rounded bg-muted p-3 text-xs space-y-1">
+                    <p className="font-medium text-foreground">{source.label}</p>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Opening:</span>
+                      <span className="font-semibold">${source.openingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Closing:</span>
+                      <span className="font-semibold">${source.closingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                    </div>
                   </div>
                 ))}
               </div>

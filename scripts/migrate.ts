@@ -30,7 +30,8 @@ async function migrate() {
         quarter_id INTEGER REFERENCES quarters(id) ON DELETE CASCADE,
         source_id VARCHAR(50) NOT NULL,
         label VARCHAR(100) NOT NULL,
-        balance DECIMAL(12,2) NOT NULL
+        opening_balance DECIMAL(12,2) NOT NULL DEFAULT 0,
+        closing_balance DECIMAL(12,2) NOT NULL DEFAULT 0
       );
     `)
 

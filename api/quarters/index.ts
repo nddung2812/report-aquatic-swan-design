@@ -89,8 +89,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     // Insert cash sources
     for (const source of cash_sources) {
       await query(
-        'INSERT INTO cash_sources (quarter_id, source_id, label, balance) VALUES ($1, $2, $3, $4)',
-        [quarterId, source.id, source.label, source.balance]
+        'INSERT INTO cash_sources (quarter_id, source_id, label, opening_balance, closing_balance) VALUES ($1, $2, $3, $4, $5)',
+        [quarterId, source.id, source.label, source.openingBalance, source.closingBalance]
       )
     }
 

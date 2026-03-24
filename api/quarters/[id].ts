@@ -50,13 +50,14 @@ async function handleGet(quarterId: number, res: VercelResponse) {
   const quarter = quarterResult.rows[0]
 
   // Get cash sources
-  const cashResult = await query('SELECT source_id, label, balance FROM cash_sources WHERE quarter_id = $1', [
+  const cashResult = await query('SELECT source_id, label, opening_balance, closing_balance FROM cash_sources WHERE quarter_id = $1', [
     quarterId,
   ])
   const cashSources = cashResult.rows.map((row: any) => ({
     id: row.source_id,
     label: row.label,
-    balance: parseFloat(row.balance),
+    openingBalance: parseFloat(row.opening_balance),
+    closingBalance: parseFloat(row.closing_balance),
   }))
 
   // Get transactions
