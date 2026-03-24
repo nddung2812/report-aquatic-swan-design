@@ -24,3 +24,14 @@ export interface PLStatement {
     type: 'income' | 'expense'
   }>
 }
+
+export interface QuarterRecord {
+  id: number
+  label: string
+  year: number
+  quarter: number
+  created_at: string
+  cash_sources: CashSource[]
+  transactions: Transaction[]
+  pl_summary: PLStatement
+}

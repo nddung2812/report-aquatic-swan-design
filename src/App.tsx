@@ -6,6 +6,8 @@ import { LoginPage } from '@/components/LoginPage'
 import { CashSourcesForm } from '@/components/CashSourcesForm'
 import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
+import { SaveQuarterDialog } from '@/components/SaveQuarterDialog'
+import { QuarterComparison } from '@/components/QuarterComparison'
 import { calculatePLStatement } from '@/lib/finance'
 import type { CashSource, Transaction } from '@/types/finance'
 
@@ -13,6 +15,7 @@ export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [cashSources, setCashSources] = useState<CashSource[] | null>(null)
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
+  const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
 
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />
@@ -88,16 +91,59 @@ export function App() {
 
                 {/* Report */}
                 {hasData && (
-                  <div className="grid gap-6">
-                    <SummaryCards
-                      cashSources={cashSources}
-                      transactions={transactions}
-                    />
-                    <PLStatementComponent
-                      statement={calculatePLStatement(transactions)}
-                    />
-                    <CashflowChart transactions={transactions} />
-                    <TransactionsTable transactions={transactions} />
+                  <div className="space-y-6">
+                    {/* Tabs */}
+                    <div className="flex gap-2 border-b">
+                      <button
+                        onClick={() => setActiveTab('current')}
+                        className={`px-4 py-2 font-medium ${
+                          activeTab === 'current'
+                            ? 'border-b-2 border-primary text-primary'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Current Quarter
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('compare')}
+                        className={`px-4 py-2 font-medium ${
+                          activeTab === 'compare'
+                            ? 'border-b-2 border-primary text-primary'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Compare Quarters
+                      </button>
+                    </div>
+
+                    {/* Current Quarter Tab */}
+                    {activeTab === 'current' && (
+                      <div className="grid gap-6">
+                        <div className="flex justify-end">
+                          <SaveQuarterDialog
+                            cashSources={cashSources}
+                            transactions={transactions}
+                            plSummary={calculatePLStatement(transactions)}
+                          />
+                        </div>
+                        <SummaryCards
+                          cashSources={cashSources}
+                          transactions={transactions}
+                        />
+                        <PLStatementComponent
+                          statement={calculatePLStatement(transactions)}
+                        />
+                        <CashflowChart transactions={transactions} />
+                        <TransactionsTable transactions={transactions} />
+                      </div>
+                    )}
+
+                    {/* Compare Quarters Tab */}
+                    {activeTab === 'compare' && (
+                      <div className="grid gap-6">
+                        <QuarterComparison />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
