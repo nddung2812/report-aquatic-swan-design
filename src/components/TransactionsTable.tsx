@@ -24,8 +24,6 @@ interface TransactionsTableProps {
   transactions: Transaction[]
 }
 
-const categories = ['Sales', 'Payroll', 'Marketing', 'Operations', 'Tax']
-
 export function TransactionsTable({ transactions }: TransactionsTableProps) {
   const { register, watch } = useForm<FilterFormData>({
     resolver: zodResolver(filterSchema),
@@ -39,6 +37,9 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
   const search = watch('search')
   const type = watch('type')
   const category = watch('category')
+
+  // Get unique categories from transactions
+  const categories = Array.from(new Set(transactions.map((t) => t.category))).sort()
 
   // Filter transactions based on form values
   const filteredTransactions = transactions.filter((t) => {
@@ -57,7 +58,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
   return (
     <Card className="col-span-full">
       <CardHeader>
-        <CardTitle>Recent Transactions</CardTitle>
+        <CardTitle>Transactions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-6 grid gap-4 md:grid-cols-3">
@@ -103,6 +104,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                 <TableHead>Category</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -110,16 +112,14 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                 filteredTransactions.map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell className="text-sm">
-                      {new Date(transaction.date).toLocaleDateString()}
+                      {new Date(transaction.date).toLocaleDateString('en-AU')}
                     </TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>{transaction.category}</TableCell>
                     <TableCell>
                       <Badge
                         variant={
-                          transaction.type === 'income'
-                            ? 'default'
-                            : 'destructive'
+                          transaction.type === 'income' ? 'default' : 'destructive'
                         }
                       >
                         {transaction.type}
@@ -134,14 +134,22 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                         }
                       >
                         {transaction.type === 'income' ? '+' : '-'}$
-                        {transaction.amount.toLocaleString()}
+                        {transaction.amount.toLocaleString('en-US', {
+                          maximumFractionDigits: 2,
+                        })}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      $
+                      {transaction.balance.toLocaleString('en-US', {
+                        maximumFractionDigits: 2,
+                      })}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No transactions found
                   </TableCell>
                 </TableRow>
