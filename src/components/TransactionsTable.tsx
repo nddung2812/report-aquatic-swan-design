@@ -1,5 +1,4 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import {
   Table,
   TableBody,
@@ -18,25 +17,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { Transaction } from '@/types/finance'
-import { filterSchema, type FilterFormData } from '@/lib/schemas'
 
 interface TransactionsTableProps {
   transactions: Transaction[]
 }
 
 export function TransactionsTable({ transactions }: TransactionsTableProps) {
-  const { register, watch } = useForm<FilterFormData>({
-    resolver: zodResolver(filterSchema),
-    defaultValues: {
-      search: '',
-      type: 'all',
-      category: undefined,
-    },
-  })
-
-  const search = watch('search')
-  const type = watch('type')
-  const category = watch('category')
+  const [search, setSearch] = useState('')
+  const [type, setType] = useState('all')
+  const [category, setCategory] = useState('')
 
   // Get unique categories from transactions
   const categories = Array.from(new Set(transactions.map((t) => t.category))).sort()
@@ -65,11 +54,12 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
           <input
             type="text"
             placeholder="Search transactions..."
-            {...register('search')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           />
 
-          <Select value={type}>
+          <Select value={type} onValueChange={setType}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -80,7 +70,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             </SelectContent>
           </Select>
 
-          <Select value={category || ''}>
+          <Select value={category} onValueChange={setCategory}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
