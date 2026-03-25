@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { CashSource, Transaction, PLStatement } from '@/types/finance'
+import type { SelectedQuarter } from '@/components/QuarterSelector'
 
 const saveQuarterSchema = z.object({
   label: z.string().min(1, 'Label is required'),
@@ -18,6 +19,7 @@ interface SaveQuarterDialogProps {
   cashSources: CashSource[]
   transactions: Transaction[]
   plSummary: PLStatement
+  selectedQuarter?: SelectedQuarter | null
   onSuccess?: () => void
 }
 
@@ -25,6 +27,7 @@ export function SaveQuarterDialog({
   cashSources,
   transactions,
   plSummary,
+  selectedQuarter,
   onSuccess,
 }: SaveQuarterDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -38,9 +41,9 @@ export function SaveQuarterDialog({
   } = useForm<SaveQuarterFormData>({
     resolver: zodResolver(saveQuarterSchema) as any,
     defaultValues: {
-      label: `Q${new Date().getMonth() > 8 ? 4 : Math.floor(new Date().getMonth() / 3) + 1} ${new Date().getFullYear()}`,
-      year: new Date().getFullYear(),
-      quarter: Math.floor(new Date().getMonth() / 3) + 1,
+      label: selectedQuarter ? `Q${selectedQuarter.quarter} ${selectedQuarter.year}` : `Q${new Date().getMonth() > 8 ? 4 : Math.floor(new Date().getMonth() / 3) + 1} ${new Date().getFullYear()}`,
+      year: selectedQuarter?.year ?? new Date().getFullYear(),
+      quarter: selectedQuarter?.quarter ?? Math.floor(new Date().getMonth() / 3) + 1,
     },
   })
 

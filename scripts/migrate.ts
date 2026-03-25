@@ -35,6 +35,38 @@ async function migrate() {
       );
     `)
 
+    // Drop old balance column if it exists
+    try {
+      await pool.query(`
+        ALTER TABLE cash_sources
+        DROP COLUMN IF EXISTS balance;
+      `)
+      console.log('✓ Dropped old balance column')
+    } catch (e) {
+      // Column might not exist
+    }
+
+    // Add missing columns to existing cash_sources table
+    try {
+      await pool.query(`
+        ALTER TABLE cash_sources
+        ADD COLUMN IF NOT EXISTS opening_balance DECIMAL(12,2) NOT NULL DEFAULT 0;
+      `)
+      console.log('✓ Added opening_balance column')
+    } catch (e) {
+      // Column might already exist
+    }
+
+    try {
+      await pool.query(`
+        ALTER TABLE cash_sources
+        ADD COLUMN IF NOT EXISTS closing_balance DECIMAL(12,2) NOT NULL DEFAULT 0;
+      `)
+      console.log('✓ Added closing_balance column')
+    } catch (e) {
+      // Column might already exist
+    }
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,

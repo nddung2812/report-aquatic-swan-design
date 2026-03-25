@@ -3,6 +3,7 @@ import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
 import { TransactionsTable } from '@/components/TransactionsTable'
 import { LoginPage } from '@/components/LoginPage'
+import { QuarterSelector, type SelectedQuarter } from '@/components/QuarterSelector'
 import { CashSourcesForm } from '@/components/CashSourcesForm'
 import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
@@ -12,15 +13,45 @@ import { calculatePLStatement } from '@/lib/finance'
 import type { CashSource, Transaction } from '@/types/finance'
 
 export function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(import.meta.env.DEV)
+  const [selectedQuarter, setSelectedQuarter] = useState<SelectedQuarter | null>(null)
   const [cashSources, setCashSources] = useState<CashSource[] | null>(null)
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
   const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
+  const [loadingQuarter, setLoadingQuarter] = useState(false)
 
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />
   }
 
+  const handleLoadSaved = async (id: number, year: number, quarter: number) => {
+    setLoadingQuarter(true)
+    try {
+      const response = await fetch(`/api/quarters/${id}`)
+      if (!response.ok) throw new Error('Failed to load quarter')
+      const data = await response.json()
+      setSelectedQuarter({ year, quarter })
+      setCashSources(data.cash_sources)
+      setTransactions(data.transactions)
+      setActiveTab('current')
+    } finally {
+      setLoadingQuarter(false)
+    }
+  }
+
+  // Step 1: Select Quarter
+  if (!selectedQuarter) {
+    if (loadingQuarter) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <p className="text-muted-foreground">Loading quarter...</p>
+        </div>
+      )
+    }
+    return <QuarterSelector onSelect={setSelectedQuarter} onLoadSaved={handleLoadSaved} />
+  }
+
+  const quarterLabel = `Q${selectedQuarter.quarter} ${selectedQuarter.year}`
   const hasData = cashSources && transactions
 
   return (
@@ -31,18 +62,32 @@ export function App() {
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Cashflow & P&L Report</h1>
             <p className="mt-2 text-muted-foreground">
-              Track your business cash position and profit & loss
+              Entering <span className="font-semibold text-foreground">{quarterLabel}</span>
             </p>
           </div>
-          <button
-            onClick={() => setIsLoggedIn(false)}
-            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
-          >
-            Log out
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setSelectedQuarter(null)
+                setCashSources(null)
+                setTransactions(null)
+                setActiveTab('current')
+                setLoadingQuarter(false)
+              }}
+              className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
+              Change Quarter
+            </button>
+            <button
+              onClick={() => setIsLoggedIn(false)}
+              className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
+              Log out
+            </button>
+          </div>
         </div>
 
-        {/* Step 1: Cash Sources Form */}
+        {/* Step 2: Cash Sources Form */}
         {!cashSources ? (
           <div className="space-y-6">
             <CashSourcesForm onSubmit={setCashSources} />
@@ -129,6 +174,7 @@ export function App() {
                             cashSources={cashSources}
                             transactions={transactions}
                             plSummary={calculatePLStatement(transactions)}
+                            selectedQuarter={selectedQuarter}
                           />
                         </div>
                         <SummaryCards
