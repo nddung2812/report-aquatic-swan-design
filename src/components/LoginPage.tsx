@@ -99,10 +99,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </button>
           </form>
 
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Demo credentials: username: <code className="bg-muted px-1">admin</code>, password:{' '}
-            <code className="bg-muted px-1">password123</code>
-          </p>
         </CardContent>
       </Card>
     </div>
