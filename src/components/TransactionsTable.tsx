@@ -62,17 +62,6 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           />
 
-          <Select value={type} onValueChange={handleTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-            </SelectContent>
-          </Select>
-
           <Select value={category} onValueChange={handleCategoryChange}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by category" />
@@ -84,6 +73,17 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                   {cat}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={type} onValueChange={handleTypeChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
             </SelectContent>
           </Select>
         </div>
