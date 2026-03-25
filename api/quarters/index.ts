@@ -47,7 +47,7 @@ async function handleGet(res: VercelResponse) {
       pl.total_income, pl.total_expenses, pl.net_profit
     FROM quarters q
     LEFT JOIN pl_summaries pl ON q.id = pl.quarter_id
-    ORDER BY q.created_at DESC
+    ORDER BY q.year DESC, q.quarter DESC
     `
   )
 
