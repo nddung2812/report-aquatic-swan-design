@@ -27,17 +27,51 @@ const accountLogos: Record<string, React.ReactNode> = {
     </svg>
   ),
   commbank_transaction: (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" xmlns="http://www.w3.org/2000/svg">
-      <rect width="24" height="24" rx="4" fill="#FFD200"/>
-      <path d="M12 3.5L20.5 12 12 20.5 3.5 12z" fill="#000"/>
-      <text x="12" y="15.5" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="#FFD200" fontFamily="sans-serif">CBA</text>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" className="h-7 w-7">
+      <defs>
+        <linearGradient id="cba-tx-lg1" x1="13.22" y1="-130.02" x2="50.78" y2="-161.53" gradientTransform="matrix(1,0,0,-1,0,-113.78)" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ff0"/>
+          <stop offset="0.27" stopColor="#fef10c"/>
+          <stop offset="0.45" stopColor="#fde516"/>
+          <stop offset="0.64" stopColor="#fde113"/>
+          <stop offset="0.82" stopColor="#fed508"/>
+          <stop offset="0.92" stopColor="#fc0"/>
+        </linearGradient>
+        <linearGradient id="cba-tx-lg2" x1="38.93" y1="-154.54" x2="50.6" y2="-161.84" gradientTransform="matrix(1,0,0,-1,0,-113.78)" gradientUnits="userSpaceOnUse">
+          <stop offset="0.1" stopColor="#874400"/>
+          <stop offset="0.26" stopColor="#d88a00"/>
+          <stop offset="0.37" stopColor="#e79d00"/>
+          <stop offset="0.52" stopColor="#f2b400"/>
+          <stop offset="0.7" stopColor="#fad202"/>
+          <stop offset="0.9" stopColor="#fedf03"/>
+        </linearGradient>
+      </defs>
+      <polyline fill="url(#cba-tx-lg1)" points="32 0 64 32 32 64 0 32 32 0"/>
+      <polygon fill="url(#cba-tx-lg2)" points="44.15 35.24 32 64 32 64 64 32 55.69 23.68 44.15 35.24"/>
     </svg>
   ),
   commbank_saver: (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" xmlns="http://www.w3.org/2000/svg">
-      <rect width="24" height="24" rx="4" fill="#FFD200"/>
-      <path d="M12 3.5L20.5 12 12 20.5 3.5 12z" fill="#000"/>
-      <text x="12" y="15.5" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="#FFD200" fontFamily="sans-serif">CBA</text>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" className="h-7 w-7">
+      <defs>
+        <linearGradient id="cba-sv-lg1" x1="13.22" y1="-130.02" x2="50.78" y2="-161.53" gradientTransform="matrix(1,0,0,-1,0,-113.78)" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ff0"/>
+          <stop offset="0.27" stopColor="#fef10c"/>
+          <stop offset="0.45" stopColor="#fde516"/>
+          <stop offset="0.64" stopColor="#fde113"/>
+          <stop offset="0.82" stopColor="#fed508"/>
+          <stop offset="0.92" stopColor="#fc0"/>
+        </linearGradient>
+        <linearGradient id="cba-sv-lg2" x1="38.93" y1="-154.54" x2="50.6" y2="-161.84" gradientTransform="matrix(1,0,0,-1,0,-113.78)" gradientUnits="userSpaceOnUse">
+          <stop offset="0.1" stopColor="#874400"/>
+          <stop offset="0.26" stopColor="#d88a00"/>
+          <stop offset="0.37" stopColor="#e79d00"/>
+          <stop offset="0.52" stopColor="#f2b400"/>
+          <stop offset="0.7" stopColor="#fad202"/>
+          <stop offset="0.9" stopColor="#fedf03"/>
+        </linearGradient>
+      </defs>
+      <polyline fill="url(#cba-sv-lg1)" points="32 0 64 32 32 64 0 32 32 0"/>
+      <polygon fill="url(#cba-sv-lg2)" points="44.15 35.24 32 64 32 64 64 32 55.69 23.68 44.15 35.24"/>
     </svg>
   ),
 }
