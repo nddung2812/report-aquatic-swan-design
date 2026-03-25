@@ -24,10 +24,10 @@ interface TransactionsTableProps {
 
 export function TransactionsTable({ transactions }: TransactionsTableProps) {
   const [search, setSearch] = useState('')
-  const [type, setType] = useState('all')
+  const [type, setType] = useState('')
   const [category, setCategory] = useState('')
 
-  const handleTypeChange = (value: string | null) => setType(value ?? 'all')
+  const handleTypeChange = (value: string | null) => setType(value ?? '')
   const handleCategoryChange = (value: string | null) => setCategory(value ?? '')
 
   // Get unique categories from transactions
@@ -40,7 +40,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
       t.description.toLowerCase().includes(search.toLowerCase()) ||
       t.category.toLowerCase().includes(search.toLowerCase())
 
-    const matchesType = type === 'all' || t.type === type
+    const matchesType = !type || t.type === type
 
     const matchesCategory = !category || t.category === category
 
@@ -88,7 +88,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="">All Types</SelectItem>
                       <SelectItem value="income">Income</SelectItem>
                       <SelectItem value="expense">Expense</SelectItem>
                     </SelectContent>
