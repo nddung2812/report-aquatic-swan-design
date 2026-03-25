@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { QuarterComparison } from '@/components/QuarterComparison'
 
 const quarterSelectorSchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100),
@@ -167,6 +168,11 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
             </Card>
           </div>
 
+        </div>
+
+        {/* Analytics below the reports */}
+        <div className="mt-8">
+          <QuarterComparison />
         </div>
       </div>
     </div>

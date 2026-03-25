@@ -9,7 +9,6 @@ import { QuarterSelector, type SelectedQuarter } from '@/components/QuarterSelec
 import { CashSourcesForm } from '@/components/CashSourcesForm'
 import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
-import { QuarterComparison } from '@/components/QuarterComparison'
 import { BreakdownCharts } from '@/components/BreakdownCharts'
 import { calculatePLStatement, getTransactionsByQuarter } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
@@ -106,7 +105,6 @@ export function App() {
   const [loadedQuarterId, setLoadedQuarterId] = useState<number | null>(null)
   const [cashSources, setCashSources] = useState<CashSource[] | null>(null)
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
-  const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
   const [loadingQuarter, setLoadingQuarter] = useState(false)
   const [editingSourceId, setEditingSourceId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<{ opening: string; closing: string }>({ opening: '', closing: '' })
@@ -129,7 +127,6 @@ export function App() {
         category: categorizeTransaction(t.description),
       }))
       setTransactions(txns.length > 0 ? txns : null)
-      setActiveTab('current')
     } finally {
       setLoadingQuarter(false)
     }
@@ -140,7 +137,6 @@ export function App() {
     setLoadedQuarterId(null)
     setCashSources(null)
     setTransactions(null)
-    setActiveTab('current')
     setLoadingQuarter(false)
     setEditingSourceId(null)
   }
@@ -396,51 +392,15 @@ export function App() {
               <div className="space-y-6">
                 {/* Report */}
                 {hasData && (
-                  <div className="space-y-6">
-                    {/* Tabs */}
-                    <div className="flex gap-2 border-b">
-                      <button
-                        onClick={() => setActiveTab('current')}
-                        className={`px-4 py-2 font-medium ${
-                          activeTab === 'current'
-                            ? 'border-b-2 border-primary text-primary'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Current Quarter
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('compare')}
-                        className={`px-4 py-2 font-medium ${
-                          activeTab === 'compare'
-                            ? 'border-b-2 border-primary text-primary'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Compare Quarters
-                      </button>
-                    </div>
-
-                    {/* Current Quarter Tab */}
-                    {activeTab === 'current' && (
-                      <div className="grid gap-6">
-                        <SummaryCards
-                          cashSources={cashSources}
-                          transactions={transactions}
-                        />
-                        <PLStatementComponent
-                          statement={calculatePLStatement(transactions)}
-                        />
-                        <TransactionsTable transactions={transactions} />
-                      </div>
-                    )}
-
-                    {/* Compare Quarters Tab */}
-                    {activeTab === 'compare' && (
-                      <div className="grid gap-6">
-                        <QuarterComparison />
-                      </div>
-                    )}
+                  <div className="grid gap-6">
+                    <SummaryCards
+                      cashSources={cashSources}
+                      transactions={transactions}
+                    />
+                    <PLStatementComponent
+                      statement={calculatePLStatement(transactions)}
+                    />
+                    <TransactionsTable transactions={transactions} />
                   </div>
                 )}
               </div>
