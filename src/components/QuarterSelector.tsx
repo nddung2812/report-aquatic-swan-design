@@ -1,3 +1,4 @@
+import { FileBarChart2, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -70,35 +71,32 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
         )}
         {savedQuarters && savedQuarters.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle>Saved Quarters</CardTitle>
-              <p className="text-sm text-muted-foreground">Click to view a saved report</p>
-            </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 pt-6">
               {savedQuarters.map((q) => (
                 <button
                   key={q.id}
                   onClick={() => onLoadSaved(q.id, q.year, q.quarter)}
-                  className="w-full rounded-md border bg-background px-4 py-3 text-left hover:bg-muted transition-colors"
+                  className="group w-full rounded-lg border bg-background px-4 py-4 text-left transition-all hover:border-primary hover:bg-primary/5 hover:shadow-sm"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{q.label}</span>
-                    <span
-                      className={`text-sm font-semibold ${
-                        q.pl_summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {q.pl_summary.netProfit >= 0 ? '+' : ''}$
-                      {q.pl_summary.netProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex gap-4 text-xs text-muted-foreground">
-                    <span>
-                      Income: ${q.pl_summary.totalIncome.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                    </span>
-                    <span>
-                      Expenses: ${q.pl_summary.totalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <FileBarChart2 className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{q.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${q.pl_summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {q.pl_summary.netProfit >= 0 ? '+' : ''}${q.pl_summary.netProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                          </span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                        </div>
+                      </div>
+                      <div className="mt-0.5 flex gap-4 text-xs text-muted-foreground">
+                        <span>Income: ${q.pl_summary.totalIncome.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                        <span>Expenses: ${q.pl_summary.totalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                      </div>
+                    </div>
                   </div>
                 </button>
               ))}
