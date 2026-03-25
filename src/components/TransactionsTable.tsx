@@ -53,39 +53,14 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
         <CardTitle>Transactions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 grid gap-4 md:grid-cols-3">
+        <div className="mb-4">
           <input
             type="text"
             placeholder="Search transactions..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           />
-
-          <Select value={category} onValueChange={handleCategoryChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={type} onValueChange={handleTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         <div className="rounded-md border">
@@ -94,8 +69,31 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>
+                  <Select value={category} onValueChange={handleCategoryChange}>
+                    <SelectTrigger className="h-8 border-0 p-0 text-xs font-medium shadow-none focus:ring-0">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Categories</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </TableHead>
+                <TableHead>
+                  <Select value={type} onValueChange={handleTypeChange}>
+                    <SelectTrigger className="h-8 border-0 p-0 text-xs font-medium shadow-none focus:ring-0">
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="expense">Expense</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
               </TableRow>
