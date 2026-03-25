@@ -42,7 +42,30 @@ const accountLogos: Record<string, React.ReactNode> = {
 }
 
 export function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(import.meta.env.DEV)
+  const AUTH_KEY = 'auth_expiry'
+  const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000
+
+  const isAuthValid = () => {
+    const expiry = localStorage.getItem(AUTH_KEY)
+    if (!expiry) return false
+    if (Date.now() > parseInt(expiry)) {
+      localStorage.removeItem(AUTH_KEY)
+      return false
+    }
+    return true
+  }
+
+  const [isLoggedIn, setIsLoggedIn] = useState(import.meta.env.DEV || isAuthValid())
+
+  const handleLogin = () => {
+    localStorage.setItem(AUTH_KEY, String(Date.now() + SEVEN_DAYS))
+    setIsLoggedIn(true)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_KEY)
+    setIsLoggedIn(false)
+  }
   const [selectedQuarter, setSelectedQuarter] = useState<SelectedQuarter | null>(null)
   const [cashSources, setCashSources] = useState<CashSource[] | null>(null)
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
@@ -64,7 +87,7 @@ export function App() {
   }
 
   if (!isLoggedIn) {
-    return <LoginPage onLogin={() => setIsLoggedIn(true)} />
+    return <LoginPage onLogin={handleLogin} />
   }
 
   const handleLoadSaved = async (id: number, year: number, quarter: number) => {
@@ -127,7 +150,7 @@ export function App() {
             </p>
           </div>
           <button
-            onClick={() => setIsLoggedIn(false)}
+            onClick={handleLogout}
             className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
           >
             Log out
