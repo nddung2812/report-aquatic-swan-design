@@ -63,7 +63,7 @@ export function App() {
       setCashSources(data.cash_sources)
       const txns = data.transactions.map((t: Transaction) => ({
         ...t,
-        category: categorizeTransaction(t.description),
+        category: t.category || categorizeTransaction(t.description),
       }))
       setTransactions(txns.length > 0 ? txns : null)
     } finally {
@@ -326,7 +326,7 @@ export function App() {
                     const reloadedData = await reloaded.json()
                     setTransactions(reloadedData.transactions.map((t: Transaction) => ({
                       ...t,
-                      category: categorizeTransaction(t.description),
+                      category: t.category || categorizeTransaction(t.description),
                     })))
                   }
                 } else {

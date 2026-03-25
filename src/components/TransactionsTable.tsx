@@ -19,6 +19,7 @@ import {
 import { ALL_CATEGORIES } from '@/lib/csvParser'
 import type { Transaction } from '@/types/finance'
 
+
 interface TransactionsTableProps {
   transactions: Transaction[]
   onCategoryChange?: (transactionId: string, category: string) => void
@@ -28,7 +29,6 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [category, setCategory] = useState('')
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
 
   const handleTypeChange = (value: string | null) => setType(value ?? '')
   const handleCategoryChange = (value: string | null) => setCategory(value ?? '')
@@ -107,33 +107,17 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
                     </TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>
-                      {editingCategoryId === transaction.id ? (
-                        <select
-                          autoFocus
-                          defaultValue={transaction.category}
-                          onBlur={() => setEditingCategoryId(null)}
-                          onChange={(e) => {
-                            const newCat = e.target.value
-                            onCategoryChange?.(transaction.id, newCat)
-                            setEditingCategoryId(null)
-                          }}
-                          className="rounded border border-input bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        >
-                          {ALL_CATEGORIES.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <button
-                          onClick={() => setEditingCategoryId(transaction.id)}
-                          className="cursor-pointer rounded px-1 py-0.5 text-sm hover:bg-muted"
-                          title="Click to edit category"
-                        >
-                          {transaction.type === 'expense'
-                            ? transaction.category.replace(/^Sales - /i, '')
-                            : transaction.category}
-                        </button>
-                      )}
+                      <select
+                        value={transaction.category}
+                        onChange={(e) => onCategoryChange?.(transaction.id, e.target.value)}
+                        className="rounded border border-input bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        {ALL_CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {transaction.type === 'expense' ? cat.replace(/^Sales - /i, '') : cat}
+                          </option>
+                        ))}
+                      </select>
                     </TableCell>
                     <TableCell>
                       <Badge variant={transaction.type === 'income' ? 'default' : 'destructive'}>

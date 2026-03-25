@@ -68,7 +68,7 @@ async function handleGet(quarterId: number, res: VercelResponse) {
     [quarterId]
   )
   const transactions = txnResult.rows.map((row: any) => ({
-    id: row.id,
+    id: String(row.id),
     date: row.date,
     description: row.description,
     amount: parseFloat(row.amount),
