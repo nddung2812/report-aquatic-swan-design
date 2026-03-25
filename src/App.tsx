@@ -57,34 +57,38 @@ export function App() {
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
+        {/* Breadcrumb */}
+        <nav className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+          <button
+            onClick={() => {
+              setSelectedQuarter(null)
+              setCashSources(null)
+              setTransactions(null)
+              setActiveTab('current')
+              setLoadingQuarter(false)
+            }}
+            className="hover:text-foreground hover:underline"
+          >
+            Home
+          </button>
+          <span>/</span>
+          <span className="font-medium text-foreground">{quarterLabel}</span>
+        </nav>
+
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Cashflow & P&L Report</h1>
             <p className="mt-2 text-muted-foreground">
-              Entering <span className="font-semibold text-foreground">{quarterLabel}</span>
+              <span className="font-semibold text-foreground">{quarterLabel}</span>
             </p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                setSelectedQuarter(null)
-                setCashSources(null)
-                setTransactions(null)
-                setActiveTab('current')
-                setLoadingQuarter(false)
-              }}
-              className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
-            >
-              Change Quarter
-            </button>
-            <button
-              onClick={() => setIsLoggedIn(false)}
-              className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
-            >
-              Log out
-            </button>
-          </div>
+          <button
+            onClick={() => setIsLoggedIn(false)}
+            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
+          >
+            Log out
+          </button>
         </div>
 
         {/* Step 2: Cash Sources Form */}
