@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { accountLogos } from '@/lib/accountLogos'
 import type { CashSource } from '@/types/finance'
 
 const cashSourcesSchema = z.object({
@@ -27,9 +28,11 @@ const sourceDefinitions: Array<{
 }> = [
   { id: 'paypal', label: 'PayPal' },
   { id: 'stripe', label: 'Stripe' },
-  { id: 'commbank_transaction', label: 'CommBank Transaction Account' },
-  { id: 'commbank_saver', label: 'CommBank Saver Account' },
+  { id: 'commbank_transaction', label: 'CommBank Transaction' },
+  { id: 'commbank_saver', label: 'CommBank Saver' },
 ]
+
+const inputCls = 'w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
 
 export function CashSourcesForm({ onSubmit }: CashSourcesFormProps) {
   const {
@@ -62,68 +65,70 @@ export function CashSourcesForm({ onSubmit }: CashSourcesFormProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>Cash Sources</CardTitle>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Enter opening and closing balances for each account
-        </p>
+        <p className="text-sm text-muted-foreground">Opening and closing balances for each account</p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          {sourceDefinitions.map((source) => (
-            <div key={source.id} className="rounded-lg border border-input bg-muted/25 p-4">
-              <h3 className="font-medium">{source.label}</h3>
-              <div className="mt-3 grid gap-4 md:grid-cols-2">
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
+          {/* Column headers */}
+          <div className="mb-2 grid grid-cols-[1fr_1fr_1fr] gap-3 px-1 text-xs font-medium text-muted-foreground">
+            <span>Account</span>
+            <span>Opening Balance</span>
+            <span>Closing Balance</span>
+          </div>
+
+          <div className="space-y-2">
+            {sourceDefinitions.map((source) => (
+              <div key={source.id} className="grid grid-cols-[1fr_1fr_1fr] items-center gap-3 rounded-lg border bg-muted/20 px-3 py-2">
+                {/* Account */}
+                <div className="flex items-center gap-2">
+                  {accountLogos[source.id]}
+                  <span className="text-sm font-medium">{source.label}</span>
+                </div>
+
+                {/* Opening */}
                 <div>
-                  <label htmlFor={`${source.id}_opening`} className="block text-sm font-medium">
-                    Opening Balance
-                  </label>
-                  <div className="mt-2 flex items-center">
+                  <div className="flex items-center gap-1">
                     <span className="text-sm text-muted-foreground">$</span>
                     <input
-                      id={`${source.id}_opening`}
                       type="number"
                       step="0.01"
                       {...register(`${source.id}_opening` as const)}
-                      className="ml-2 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                      placeholder="0.00"
+                      className={inputCls}
                     />
                   </div>
                   {errors[`${source.id}_opening` as keyof typeof errors] && (
-                    <p className="mt-1 text-sm text-destructive">
+                    <p className="mt-0.5 text-xs text-destructive">
                       {errors[`${source.id}_opening` as keyof typeof errors]?.message}
                     </p>
                   )}
                 </div>
 
+                {/* Closing */}
                 <div>
-                  <label htmlFor={`${source.id}_closing`} className="block text-sm font-medium">
-                    Closing Balance
-                  </label>
-                  <div className="mt-2 flex items-center">
+                  <div className="flex items-center gap-1">
                     <span className="text-sm text-muted-foreground">$</span>
                     <input
-                      id={`${source.id}_closing`}
                       type="number"
                       step="0.01"
                       {...register(`${source.id}_closing` as const)}
-                      className="ml-2 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                      placeholder="0.00"
+                      className={inputCls}
                     />
                   </div>
                   {errors[`${source.id}_closing` as keyof typeof errors] && (
-                    <p className="mt-1 text-sm text-destructive">
+                    <p className="mt-0.5 text-xs text-destructive">
                       {errors[`${source.id}_closing` as keyof typeof errors]?.message}
                     </p>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
           <button
             type="submit"
-            className="mt-6 w-full rounded-md bg-primary py-2 font-medium text-primary-foreground hover:bg-primary/90"
+            className="mt-4 w-full rounded-md bg-primary py-2 font-medium text-primary-foreground hover:bg-primary/90"
           >
             Continue to CSV Upload
           </button>
