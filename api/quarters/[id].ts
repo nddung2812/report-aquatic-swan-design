@@ -102,20 +102,36 @@ async function handleGet(quarterId: number, res: VercelResponse) {
 }
 
 async function handlePatch(quarterId: number, req: VercelRequest, res: VercelResponse) {
-  const { cash_sources } = req.body as { cash_sources: CashSource[] }
+  const { cash_sources, transactions } = req.body as { cash_sources?: CashSource[], transactions?: Transaction[] }
 
-  if (!cash_sources || !Array.isArray(cash_sources)) {
-    return res.status(400).json({ error: 'cash_sources array required' })
+  if (cash_sources) {
+    for (const source of cash_sources) {
+      await query(
+        'UPDATE cash_sources SET opening_balance = $1, closing_balance = $2 WHERE quarter_id = $3 AND source_id = $4',
+        [source.openingBalance, source.closingBalance, quarterId, source.id]
+      )
+    }
   }
 
-  for (const source of cash_sources) {
+  if (transactions) {
+    await query('DELETE FROM transactions WHERE quarter_id = $1', [quarterId])
+    for (const txn of transactions) {
+      await query(
+        'INSERT INTO transactions (quarter_id, date, description, amount, balance, category, type) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [quarterId, txn.date, txn.description, txn.amount, txn.balance, txn.category, txn.type]
+      )
+    }
+
+    const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+    const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+    await query('DELETE FROM pl_summaries WHERE quarter_id = $1', [quarterId])
     await query(
-      'UPDATE cash_sources SET opening_balance = $1, closing_balance = $2 WHERE quarter_id = $3 AND source_id = $4',
-      [source.openingBalance, source.closingBalance, quarterId, source.id]
+      'INSERT INTO pl_summaries (quarter_id, total_income, total_expenses, net_profit) VALUES ($1, $2, $3, $4)',
+      [quarterId, totalIncome, totalExpenses, totalIncome - totalExpenses]
     )
   }
 
-  return res.status(200).json({ message: 'Cash sources updated' })
+  return res.status(200).json({ message: 'Quarter updated' })
 }
 
 async function handleDelete(quarterId: number, res: VercelResponse) {

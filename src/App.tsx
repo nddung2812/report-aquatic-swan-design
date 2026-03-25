@@ -347,9 +347,17 @@ export function App() {
 
             {/* Step 2: CSV Upload */}
             {!transactions ? (
-              <CsvUpload onUpload={(txns) =>
-                setTransactions(getTransactionsByQuarter(txns, selectedQuarter!.quarter, selectedQuarter!.year))
-              } />
+              <CsvUpload onUpload={async (txns) => {
+                const filtered = getTransactionsByQuarter(txns, selectedQuarter!.quarter, selectedQuarter!.year)
+                setTransactions(filtered)
+                if (loadedQuarterId) {
+                  await fetch(`/api/quarters/${loadedQuarterId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transactions: filtered }),
+                  })
+                }
+              }} />
             ) : (
               <div className="space-y-6">
                 {/* Report */}
