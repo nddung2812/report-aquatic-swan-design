@@ -190,20 +190,6 @@ export function App() {
               <CsvUpload onUpload={setTransactions} />
             ) : (
               <div className="space-y-6">
-                {/* Transactions Summary */}
-                <div className="rounded-lg border bg-card p-4">
-                  <h3 className="text-sm font-medium">CSV Imported</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {transactions.length} transactions parsed
-                  </p>
-                  <button
-                    onClick={() => setTransactions(null)}
-                    className="mt-3 text-xs text-muted-foreground hover:underline"
-                  >
-                    Upload different file
-                  </button>
-                </div>
-
                 {/* Report */}
                 {hasData && (
                   <div className="space-y-6">
