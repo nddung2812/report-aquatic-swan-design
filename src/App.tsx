@@ -134,17 +134,17 @@ export function App() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Cashflow & P&L Report</h1>
-            <p className="mt-2 text-muted-foreground">
+            <h1 className="text-2xl font-bold tracking-tight md:text-4xl">Cashflow & P&L Report</h1>
+            <p className="mt-1 text-sm text-muted-foreground md:mt-2 md:text-base">
               <span className="font-semibold text-foreground">{quarterLabel}</span>
             </p>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            className="flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 md:px-4"
           >
             <Power className="h-4 w-4" />
-            Log out
+            <span className="hidden md:inline">Log out</span>
           </button>
         </div>
 
