@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Wallet, CreditCard, Landmark, PiggyBank } from 'lucide-react'
 import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
 import { TransactionsTable } from '@/components/TransactionsTable'
@@ -14,11 +13,11 @@ import { calculatePLStatement } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
 import type { CashSource, Transaction } from '@/types/finance'
 
-const accountIcons: Record<string, React.ReactNode> = {
-  paypal: <Wallet className="h-5 w-5" />,
-  stripe: <CreditCard className="h-5 w-5" />,
-  commbank_transaction: <Landmark className="h-5 w-5" />,
-  commbank_saver: <PiggyBank className="h-5 w-5" />,
+const accountLogos: Record<string, string> = {
+  paypal: 'https://logo.clearbit.com/paypal.com',
+  stripe: 'https://logo.clearbit.com/stripe.com',
+  commbank_transaction: 'https://logo.clearbit.com/commbank.com.au',
+  commbank_saver: 'https://logo.clearbit.com/commbank.com.au',
 }
 
 export function App() {
@@ -125,7 +124,7 @@ export function App() {
             <div className="flex flex-wrap items-center gap-3">
               {cashSources.map((source) => (
                 <div key={source.id} className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
-                  <span className="text-muted-foreground">{accountIcons[source.id]}</span>
+                  <img src={accountLogos[source.id]} alt={source.label} className="h-7 w-7 rounded-md object-contain" />
                   <div>
                     <p className="text-xs text-muted-foreground">{source.label}</p>
                     <p className="text-sm font-semibold">
