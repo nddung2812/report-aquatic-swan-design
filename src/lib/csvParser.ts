@@ -3,10 +3,11 @@ import type { Transaction } from '@/types/finance'
 
 const categoryKeywords: Record<string, string[]> = {
   Sales: ['paypal', 'stripe', 'invoice', 'payment received', 'transfer in'],
-  Payroll: ['payroll', 'salary', 'wages', 'superannuation'],
+  Payroll: ['payroll', 'salary', 'wages', 'wage', 'superannuation', 'super'],
   Marketing: ['facebook', 'google', 'ads', 'marketing', 'advertising'],
-  Operations: ['rent', 'utilities', 'electricity', 'internet', 'office', 'supplies'],
+  Operations: ['rent', 'utilities', 'electricity', 'internet', 'office', 'supplies', 'origin energy', 'agl', 'energy australia', 'simply energy', 'ergon', 'energex', 'ausgrid', 'endeavour energy', 'water', 'sewerage'],
   Tax: ['ato', 'tax', 'gst', 'bpay'],
+  Postage: ['australia post', 'auspost', 'post ', 'courier', 'fastway', 'aramex', 'sendle', 'dhl', 'fedex', 'startrack'],
 }
 
 function categorizeTransaction(description: string): string {
