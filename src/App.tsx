@@ -214,14 +214,6 @@ export function App() {
                     {/* Current Quarter Tab */}
                     {activeTab === 'current' && (
                       <div className="grid gap-6">
-                        <div className="flex items-center justify-end gap-3">
-                          <SaveQuarterDialog
-                            cashSources={cashSources}
-                            transactions={transactions}
-                            plSummary={calculatePLStatement(transactions)}
-                            selectedQuarter={selectedQuarter}
-                          />
-                        </div>
                         <SummaryCards
                           cashSources={cashSources}
                           transactions={transactions}
