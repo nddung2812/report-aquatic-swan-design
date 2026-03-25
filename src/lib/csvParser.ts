@@ -7,7 +7,7 @@ const categoryKeywords: Record<string, string[]> = {
   Marketing: ['facebook', 'google', 'ads', 'marketing', 'advertising'],
   Operations: ['rent', 'internet', 'office', 'supplies'],
   'Utility Bills': ['origin energy', 'agl', 'energy australia', 'simply energy', 'ergon', 'energex', 'ausgrid', 'endeavour energy', 'electricity', 'utilities', 'water', 'sewerage'],
-  Tax: ['ato', 'tax', 'gst', 'bpay'],
+  'Tax/Government Charges': ['ato', 'tax', 'gst', 'bpay'],
   Postage: ['australia post', 'auspost', 'post ', 'courier', 'fastway', 'aramex', 'sendle', 'dhl', 'fedex', 'startrack'],
 }
 

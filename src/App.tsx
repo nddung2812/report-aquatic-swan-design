@@ -71,6 +71,8 @@ export function App() {
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
   const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
   const [loadingQuarter, setLoadingQuarter] = useState(false)
+  const [editingSourceId, setEditingSourceId] = useState<string | null>(null)
+  const [editValues, setEditValues] = useState<{ opening: string; closing: string }>({ opening: '', closing: '' })
 
   if (!isLoggedIn) {
     return <LoginPage onLogin={handleLogin} />
@@ -100,6 +102,22 @@ export function App() {
     setTransactions(null)
     setActiveTab('current')
     setLoadingQuarter(false)
+    setEditingSourceId(null)
+  }
+
+  const handleStartEdit = (source: CashSource) => {
+    setEditingSourceId(source.id)
+    setEditValues({ opening: String(source.openingBalance), closing: String(source.closingBalance) })
+  }
+
+  const handleSaveEdit = () => {
+    if (!editingSourceId) return
+    setCashSources(prev => prev!.map(s =>
+      s.id === editingSourceId
+        ? { ...s, openingBalance: parseFloat(editValues.opening) || 0, closingBalance: parseFloat(editValues.closing) || 0 }
+        : s
+    ))
+    setEditingSourceId(null)
   }
 
   const quarterLabel = selectedQuarter
@@ -176,24 +194,76 @@ export function App() {
         ) : (
           <div className="space-y-6">
             {/* Cash Sources Summary */}
-            <div className="flex flex-wrap items-center gap-3">
-              {cashSources.map((source) => (
-                <div key={source.id} className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
-                  {accountLogos[source.id]}
-                  <div>
-                    <p className="text-xs text-muted-foreground">{source.label}</p>
-                    <p className="text-sm font-semibold">
-                      ${source.closingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                    </p>
+            <div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {cashSources.map((source) => (
+                  <button
+                    key={source.id}
+                    onClick={() => editingSourceId === source.id ? setEditingSourceId(null) : handleStartEdit(source)}
+                    className={`flex flex-col items-center gap-2 rounded-lg border bg-card px-3 py-4 text-center transition-all hover:border-primary hover:bg-primary/5 ${editingSourceId === source.id ? 'border-primary bg-primary/5' : ''}`}
+                  >
+                    {accountLogos[source.id]}
+                    <div>
+                      <p className="text-xs text-muted-foreground">{source.label}</p>
+                      <p className="text-sm font-semibold">
+                        ${source.closingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Inline Edit Panel */}
+              {editingSourceId && (() => {
+                const source = cashSources.find(s => s.id === editingSourceId)!
+                return (
+                  <div className="mt-3 rounded-lg border bg-muted/30 p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-sm font-medium">{source.label}</p>
+                      <button
+                        onClick={() => setEditingSourceId(null)}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="mb-1 block text-xs text-muted-foreground">Opening Balance</label>
+                        <div className="flex items-center">
+                          <span className="text-sm text-muted-foreground">$</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editValues.opening}
+                            onChange={(e) => setEditValues(v => ({ ...v, opening: e.target.value }))}
+                            className="ml-1 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs text-muted-foreground">Closing Balance</label>
+                        <div className="flex items-center">
+                          <span className="text-sm text-muted-foreground">$</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editValues.closing}
+                            onChange={(e) => setEditValues(v => ({ ...v, closing: e.target.value }))}
+                            className="ml-1 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleSaveEdit}
+                      className="mt-3 w-full rounded-md bg-primary py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      Save
+                    </button>
                   </div>
-                </div>
-              ))}
-              <button
-                onClick={() => setCashSources(null)}
-                className="text-xs text-muted-foreground hover:underline"
-              >
-                Edit
-              </button>
+                )
+              })()}
             </div>
 
             {/* Cashflow Chart — full width, shown once transactions are loaded */}
