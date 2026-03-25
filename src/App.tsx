@@ -102,6 +102,7 @@ export function App() {
     setIsLoggedIn(false)
   }
   const [selectedQuarter, setSelectedQuarter] = useState<SelectedQuarter | null>(null)
+  const [loadedQuarterId, setLoadedQuarterId] = useState<number | null>(null)
   const [cashSources, setCashSources] = useState<CashSource[] | null>(null)
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
   const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
@@ -120,6 +121,7 @@ export function App() {
       if (!response.ok) throw new Error('Failed to load quarter')
       const data = await response.json()
       setSelectedQuarter({ year, quarter })
+      setLoadedQuarterId(id)
       setCashSources(data.cash_sources)
       setTransactions(data.transactions.map((t: Transaction) => ({
         ...t,
@@ -133,6 +135,7 @@ export function App() {
 
   const goHome = () => {
     setSelectedQuarter(null)
+    setLoadedQuarterId(null)
     setCashSources(null)
     setTransactions(null)
     setActiveTab('current')
@@ -145,14 +148,23 @@ export function App() {
     setEditValues({ opening: String(source.openingBalance), closing: String(source.closingBalance) })
   }
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingSourceId) return
-    setCashSources(prev => prev!.map(s =>
+    const updatedSources = cashSources!.map(s =>
       s.id === editingSourceId
         ? { ...s, openingBalance: parseFloat(editValues.opening) || 0, closingBalance: parseFloat(editValues.closing) || 0 }
         : s
-    ))
+    )
+    setCashSources(updatedSources)
     setEditingSourceId(null)
+
+    if (loadedQuarterId) {
+      await fetch(`/api/quarters/${loadedQuarterId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cash_sources: updatedSources }),
+      })
+    }
   }
 
   const quarterLabel = selectedQuarter
