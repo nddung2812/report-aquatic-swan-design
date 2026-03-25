@@ -10,6 +10,7 @@ import { PLStatementComponent } from '@/components/PLStatement'
 import { SaveQuarterDialog } from '@/components/SaveQuarterDialog'
 import { QuarterComparison } from '@/components/QuarterComparison'
 import { calculatePLStatement } from '@/lib/finance'
+import { categorizeTransaction } from '@/lib/csvParser'
 import type { CashSource, Transaction } from '@/types/finance'
 
 export function App() {
@@ -19,6 +20,14 @@ export function App() {
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
   const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
   const [loadingQuarter, setLoadingQuarter] = useState(false)
+
+  const handleRecategorize = () => {
+    if (!transactions) return
+    setTransactions(transactions.map((t) => ({
+      ...t,
+      category: categorizeTransaction(t.description),
+    })))
+  }
 
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />
@@ -135,12 +144,20 @@ export function App() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {transactions.length} transactions parsed
                   </p>
-                  <button
-                    onClick={() => setTransactions(null)}
-                    className="mt-3 text-xs text-primary hover:underline"
-                  >
-                    Upload different file
-                  </button>
+                  <div className="mt-3 flex gap-4">
+                    <button
+                      onClick={handleRecategorize}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Re-categorize
+                    </button>
+                    <button
+                      onClick={() => setTransactions(null)}
+                      className="text-xs text-muted-foreground hover:underline"
+                    >
+                      Upload different file
+                    </button>
+                  </div>
                 </div>
 
                 {/* Report */}

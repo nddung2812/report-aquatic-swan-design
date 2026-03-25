@@ -10,7 +10,7 @@ const categoryKeywords: Record<string, string[]> = {
   Postage: ['australia post', 'auspost', 'post ', 'courier', 'fastway', 'aramex', 'sendle', 'dhl', 'fedex', 'startrack'],
 }
 
-function categorizeTransaction(description: string): string {
+export function categorizeTransaction(description: string): string {
   const lowerDesc = description.toLowerCase()
 
   for (const [category, keywords] of Object.entries(categoryKeywords)) {
