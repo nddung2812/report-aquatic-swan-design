@@ -11,7 +11,7 @@ import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
 import { QuarterComparison } from '@/components/QuarterComparison'
 import { BreakdownCharts } from '@/components/BreakdownCharts'
-import { calculatePLStatement } from '@/lib/finance'
+import { calculatePLStatement, getTransactionsByQuarter } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
 import type { CashSource, Transaction } from '@/types/finance'
 
@@ -347,7 +347,9 @@ export function App() {
 
             {/* Step 2: CSV Upload */}
             {!transactions ? (
-              <CsvUpload onUpload={setTransactions} />
+              <CsvUpload onUpload={(txns) =>
+                setTransactions(getTransactionsByQuarter(txns, selectedQuarter!.quarter, selectedQuarter!.year))
+              } />
             ) : (
               <div className="space-y-6">
                 {/* Report */}
