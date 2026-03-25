@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { query } from '../_db'
+import { query } from '../_db.js'
 import type { CashSource, Transaction, PLStatement } from '../../src/types/finance'
 
 interface QuarterRecord {
