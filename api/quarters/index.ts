@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { query } from '../_db.js'
-import type { CashSource, Transaction, PLStatement } from '../../src/types/finance'
+import type { CashSource, Transaction, PLStatement } from '../../src/types/finance.js'
 
 interface QuarterRecord {
   id: number
