@@ -41,6 +41,8 @@ const categoryKeywords: Record<string, string[]> = {
   ],
 };
 
+export const ALL_CATEGORIES = [...Object.keys(categoryKeywords), 'Other']
+
 export function categorizeTransaction(description: string): string {
   const lowerDesc = description.toLowerCase();
 

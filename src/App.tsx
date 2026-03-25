@@ -146,6 +146,18 @@ export function App() {
     setEditValues({ opening: String(source.openingBalance), closing: String(source.closingBalance) })
   }
 
+  const handleCategoryChange = async (transactionId: string, category: string) => {
+    setTransactions(prev => prev!.map(t => t.id === transactionId ? { ...t, category } : t))
+    const numId = parseInt(transactionId)
+    if (!isNaN(numId)) {
+      await fetch(`/api/transactions/${numId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category }),
+      })
+    }
+  }
+
   const handleSaveEdit = async () => {
     if (!editingSourceId) return
     const updatedSources = cashSources!.map(s =>
@@ -369,6 +381,15 @@ export function App() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ transactions: filtered, cash_sources: cashSources }),
                   })
+                  // Reload so transaction rows have DB integer IDs (needed for category editing)
+                  const reloaded = await fetch(`/api/quarters/${quarterId}`)
+                  if (reloaded.ok) {
+                    const reloadedData = await reloaded.json()
+                    setTransactions(reloadedData.transactions.map((t: Transaction) => ({
+                      ...t,
+                      category: categorizeTransaction(t.description),
+                    })))
+                  }
                 } else {
                   const totalIncome = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
                   const totalExpenses = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
@@ -400,7 +421,7 @@ export function App() {
                     <PLStatementComponent
                       statement={calculatePLStatement(transactions)}
                     />
-                    <TransactionsTable transactions={transactions} />
+                    <TransactionsTable transactions={transactions} onCategoryChange={handleCategoryChange} />
                   </div>
                 )}
               </div>

@@ -16,36 +16,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ALL_CATEGORIES } from '@/lib/csvParser'
 import type { Transaction } from '@/types/finance'
 
 interface TransactionsTableProps {
   transactions: Transaction[]
+  onCategoryChange?: (transactionId: string, category: string) => void
 }
 
-export function TransactionsTable({ transactions }: TransactionsTableProps) {
+export function TransactionsTable({ transactions, onCategoryChange }: TransactionsTableProps) {
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [category, setCategory] = useState('')
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
 
   const handleTypeChange = (value: string | null) => setType(value ?? '')
   const handleCategoryChange = (value: string | null) => setCategory(value ?? '')
 
-  // Get unique categories from transactions
   const categories = Array.from(new Set(transactions.map((t) => t.category))).sort()
 
-  // Filter transactions based on form values (sorted latest first)
-  const filteredTransactions = [...transactions].sort((a, b) => b.date.localeCompare(a.date)).filter((t) => {
-    const matchesSearch =
-      !search ||
-      t.description.toLowerCase().includes(search.toLowerCase()) ||
-      t.category.toLowerCase().includes(search.toLowerCase())
-
-    const matchesType = !type || t.type === type
-
-    const matchesCategory = !category || t.category === category
-
-    return matchesSearch && matchesType && matchesCategory
-  })
+  const filteredTransactions = [...transactions]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .filter((t) => {
+      const matchesSearch =
+        !search ||
+        t.description.toLowerCase().includes(search.toLowerCase()) ||
+        t.category.toLowerCase().includes(search.toLowerCase())
+      const matchesType = !type || t.type === type
+      const matchesCategory = !category || t.category === category
+      return matchesSearch && matchesType && matchesCategory
+    })
 
   return (
     <Card className="col-span-full">
@@ -106,35 +106,46 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                       {new Date(transaction.date).toLocaleDateString('en-AU')}
                     </TableCell>
                     <TableCell>{transaction.description}</TableCell>
-                    <TableCell>{transaction.category}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          transaction.type === 'income' ? 'default' : 'destructive'
-                        }
-                      >
+                      {editingCategoryId === transaction.id ? (
+                        <select
+                          autoFocus
+                          defaultValue={transaction.category}
+                          onBlur={() => setEditingCategoryId(null)}
+                          onChange={(e) => {
+                            const newCat = e.target.value
+                            onCategoryChange?.(transaction.id, newCat)
+                            setEditingCategoryId(null)
+                          }}
+                          className="rounded border border-input bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        >
+                          {ALL_CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <button
+                          onClick={() => setEditingCategoryId(transaction.id)}
+                          className="cursor-pointer rounded px-1 py-0.5 text-sm hover:bg-muted"
+                          title="Click to edit category"
+                        >
+                          {transaction.category}
+                        </button>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={transaction.type === 'income' ? 'default' : 'destructive'}>
                         {transaction.type}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">
-                      <span
-                        className={
-                          transaction.type === 'income'
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }
-                      >
+                      <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
                         {transaction.type === 'income' ? '+' : '-'}$
-                        {transaction.amount.toLocaleString('en-US', {
-                          maximumFractionDigits: 2,
-                        })}
+                        {transaction.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      $
-                      {transaction.balance.toLocaleString('en-US', {
-                        maximumFractionDigits: 2,
-                      })}
+                      ${transaction.balance.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                     </TableCell>
                   </TableRow>
                 ))
