@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Power } from 'lucide-react'
 import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
 import { TransactionsTable } from '@/components/TransactionsTable'
@@ -151,8 +152,9 @@ export function App() {
           </div>
           <button
             onClick={handleLogout}
-            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
+            className="flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
           >
+            <Power className="h-4 w-4" />
             Log out
           </button>
         </div>
