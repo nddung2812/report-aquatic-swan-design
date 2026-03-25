@@ -68,7 +68,6 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
 
           {/* Left: Saved quarters list */}
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold">Saved Reports</h2>
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading saved quarters...</p>
             )}
