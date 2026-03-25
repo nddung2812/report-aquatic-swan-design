@@ -10,6 +10,7 @@ import { CashSourcesForm } from '@/components/CashSourcesForm'
 import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
 import { QuarterComparison } from '@/components/QuarterComparison'
+import { BreakdownCharts } from '@/components/BreakdownCharts'
 import { calculatePLStatement } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
 import type { CashSource, Transaction } from '@/types/finance'
@@ -342,6 +343,7 @@ export function App() {
 
             {/* Cashflow Chart — full width, shown once transactions are loaded */}
             {hasData && <CashflowChart transactions={transactions} />}
+            {hasData && <BreakdownCharts transactions={transactions} />}
 
             {/* Step 2: CSV Upload */}
             {!transactions ? (
