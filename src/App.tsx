@@ -72,20 +72,6 @@ export function App() {
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
   const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
   const [loadingQuarter, setLoadingQuarter] = useState(false)
-  const [recategorizeMsg, setRecategorizeMsg] = useState<string | null>(null)
-
-  const handleRecategorize = () => {
-    if (!transactions) return
-    let changed = 0
-    const updated = transactions.map((t) => {
-      const newCategory = categorizeTransaction(t.description)
-      if (newCategory !== t.category) changed++
-      return { ...t, category: newCategory }
-    })
-    setTransactions(updated)
-    setRecategorizeMsg(changed > 0 ? `${changed} transaction${changed > 1 ? 's' : ''} updated` : 'No changes — categories already up to date')
-    setTimeout(() => setRecategorizeMsg(null), 4000)
-  }
 
   if (!isLoggedIn) {
     return <LoginPage onLogin={handleLogin} />
@@ -99,7 +85,10 @@ export function App() {
       const data = await response.json()
       setSelectedQuarter({ year, quarter })
       setCashSources(data.cash_sources)
-      setTransactions(data.transactions)
+      setTransactions(data.transactions.map((t: Transaction) => ({
+        ...t,
+        category: categorizeTransaction(t.description),
+      })))
       setActiveTab('current')
     } finally {
       setLoadingQuarter(false)
@@ -226,15 +215,6 @@ export function App() {
                     {activeTab === 'current' && (
                       <div className="grid gap-6">
                         <div className="flex items-center justify-end gap-3">
-                          {recategorizeMsg && (
-                            <span className="text-sm text-muted-foreground">{recategorizeMsg}</span>
-                          )}
-                          <button
-                            onClick={handleRecategorize}
-                            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
-                          >
-                            Re-categorize
-                          </button>
                           <SaveQuarterDialog
                             cashSources={cashSources}
                             transactions={transactions}
