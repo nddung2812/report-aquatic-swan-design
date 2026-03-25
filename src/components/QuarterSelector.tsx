@@ -79,7 +79,7 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
               <button
                 key={q.id}
                 onClick={() => onLoadSaved(q.id, q.year, q.quarter)}
-                className="group w-full rounded-lg border bg-background px-4 py-4 text-left transition-all hover:border-primary hover:bg-primary/5 hover:shadow-sm"
+                className="group w-full cursor-pointer rounded-lg border bg-background px-4 py-4 text-left transition-all hover:border-primary hover:bg-primary/5 hover:shadow-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
