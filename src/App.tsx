@@ -185,6 +185,9 @@ export function App() {
               </button>
             </div>
 
+            {/* Cashflow Chart — full width, shown once transactions are loaded */}
+            {hasData && <CashflowChart transactions={transactions} />}
+
             {/* Step 2: CSV Upload */}
             {!transactions ? (
               <CsvUpload onUpload={setTransactions} />
@@ -244,7 +247,6 @@ export function App() {
                         <PLStatementComponent
                           statement={calculatePLStatement(transactions)}
                         />
-                        <CashflowChart transactions={transactions} />
                         <TransactionsTable transactions={transactions} />
                       </div>
                     )}
