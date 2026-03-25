@@ -129,7 +129,9 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
                           className="cursor-pointer rounded px-1 py-0.5 text-sm hover:bg-muted"
                           title="Click to edit category"
                         >
-                          {transaction.category}
+                          {transaction.type === 'expense'
+                            ? transaction.category.replace(/^Sales - /i, '')
+                            : transaction.category}
                         </button>
                       )}
                     </TableCell>

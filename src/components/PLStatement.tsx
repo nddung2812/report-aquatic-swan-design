@@ -90,7 +90,7 @@ export function PLStatementComponent({ statement }: PLStatementProps) {
                   const net = amounts.income - amounts.expense
                   return (
                     <TableRow key={category}>
-                      <TableCell className="font-medium">{category}</TableCell>
+                      <TableCell className="font-medium">{category.replace(/^Sales - /i, '')}</TableCell>
                       <TableCell className="text-right text-green-600">
                         {amounts.income > 0
                           ? `$${amounts.income.toLocaleString('en-US', {
