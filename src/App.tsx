@@ -144,20 +144,12 @@ export function App() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {transactions.length} transactions parsed
                   </p>
-                  <div className="mt-3 flex gap-4">
-                    <button
-                      onClick={handleRecategorize}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Re-categorize
-                    </button>
-                    <button
-                      onClick={() => setTransactions(null)}
-                      className="text-xs text-muted-foreground hover:underline"
-                    >
-                      Upload different file
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setTransactions(null)}
+                    className="mt-3 text-xs text-muted-foreground hover:underline"
+                  >
+                    Upload different file
+                  </button>
                 </div>
 
                 {/* Report */}
@@ -190,7 +182,13 @@ export function App() {
                     {/* Current Quarter Tab */}
                     {activeTab === 'current' && (
                       <div className="grid gap-6">
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={handleRecategorize}
+                            className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
+                          >
+                            Re-categorize
+                          </button>
                           <SaveQuarterDialog
                             cashSources={cashSources}
                             transactions={transactions}
