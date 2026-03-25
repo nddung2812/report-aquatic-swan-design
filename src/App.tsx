@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Power, Home, BarChart3 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SummaryCards } from '@/components/SummaryCards'
@@ -17,6 +17,7 @@ import type { CashSource, Transaction } from '@/types/finance'
 
 export function App() {
   const AUTH_KEY = 'auth_expiry'
+  const LAST_QUARTER_KEY = 'last_quarter_id'
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000
 
   const isAuthValid = () => {
@@ -66,10 +67,37 @@ export function App() {
         category: t.category || categorizeTransaction(t.description),
       }))
       setTransactions(txns.length > 0 ? txns : null)
+      localStorage.setItem(LAST_QUARTER_KEY, String(id))
     } finally {
       setLoadingQuarter(false)
     }
   }
+
+  // Auto-restore last-viewed quarter on page load
+  useEffect(() => {
+    if (!isLoggedIn) return
+    const savedId = localStorage.getItem(LAST_QUARTER_KEY)
+    if (!savedId) return
+    const id = parseInt(savedId)
+    if (isNaN(id)) return
+    setLoadingQuarter(true)
+    fetch(`/api/quarters/${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) { localStorage.removeItem(LAST_QUARTER_KEY); return }
+        setSelectedQuarter({ year: data.year, quarter: data.quarter })
+        setLoadedQuarterId(id)
+        setCashSources(data.cash_sources)
+        const txns = data.transactions.map((t: Transaction) => ({
+          ...t,
+          category: t.category || categorizeTransaction(t.description),
+        }))
+        setTransactions(txns.length > 0 ? txns : null)
+      })
+      .catch(() => localStorage.removeItem(LAST_QUARTER_KEY))
+      .finally(() => setLoadingQuarter(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn])
 
   const goHome = () => {
     setSelectedQuarter(null)
@@ -78,6 +106,7 @@ export function App() {
     setTransactions(null)
     setLoadingQuarter(false)
     setEditingSourceId(null)
+    localStorage.removeItem(LAST_QUARTER_KEY)
   }
 
   const handleStartEdit = (source: CashSource) => {
