@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Power, Home, BarChart3 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
 import { TransactionsTable } from '@/components/TransactionsTable'
@@ -163,10 +164,37 @@ export function App() {
       </header>
 
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        {/* Loading */}
+        {/* Loading skeleton */}
         {loadingQuarter && (
-          <div className="flex min-h-[60vh] items-center justify-center">
-            <p className="text-muted-foreground">Loading quarter...</p>
+          <div className="space-y-6">
+            {/* Page header */}
+            <div className="space-y-2">
+              <Skeleton className="h-9 w-72" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            {/* Cash sources grid */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))}
+            </div>
+            {/* Chart */}
+            <Skeleton className="h-64 w-full rounded-lg" />
+            {/* Tabs */}
+            <div className="flex gap-2 border-b pb-0">
+              <Skeleton className="h-9 w-36" />
+              <Skeleton className="h-9 w-36" />
+            </div>
+            {/* Summary cards */}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))}
+            </div>
+            {/* P&L table */}
+            <Skeleton className="h-48 w-full rounded-lg" />
+            {/* Transactions table */}
+            <Skeleton className="h-64 w-full rounded-lg" />
           </div>
         )}
 
