@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Power } from 'lucide-react'
+import { Power, Home, BarChart3 } from 'lucide-react'
 import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
 import { TransactionsTable } from '@/components/TransactionsTable'
@@ -8,7 +8,6 @@ import { QuarterSelector, type SelectedQuarter } from '@/components/QuarterSelec
 import { CashSourcesForm } from '@/components/CashSourcesForm'
 import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
-import { SaveQuarterDialog } from '@/components/SaveQuarterDialog'
 import { QuarterComparison } from '@/components/QuarterComparison'
 import { calculatePLStatement } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
@@ -95,58 +94,79 @@ export function App() {
     }
   }
 
-  // Step 1: Select Quarter
-  if (!selectedQuarter) {
-    if (loadingQuarter) {
-      return (
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-muted-foreground">Loading quarter...</p>
-        </div>
-      )
-    }
-    return <QuarterSelector onSelect={setSelectedQuarter} onLoadSaved={handleLoadSaved} />
+  const goHome = () => {
+    setSelectedQuarter(null)
+    setCashSources(null)
+    setTransactions(null)
+    setActiveTab('current')
+    setLoadingQuarter(false)
   }
 
-  const quarterLabel = `Q${selectedQuarter.quarter} ${selectedQuarter.year}`
+  const quarterLabel = selectedQuarter
+    ? `Q${selectedQuarter.quarter} ${selectedQuarter.year}`
+    : null
   const hasData = cashSources && transactions
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-8">
-      <div className="mx-auto max-w-7xl">
-        {/* Breadcrumb */}
-        <nav className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+    <div className="min-h-screen bg-background">
+      {/* Global Nav */}
+      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
           <button
-            onClick={() => {
-              setSelectedQuarter(null)
-              setCashSources(null)
-              setTransactions(null)
-              setActiveTab('current')
-              setLoadingQuarter(false)
-            }}
-            className="hover:text-foreground hover:underline"
+            onClick={goHome}
+            className="flex items-center gap-2 font-semibold hover:text-primary transition-colors"
           >
-            Home
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <span className="hidden sm:inline">Finance Report</span>
           </button>
-          <span>/</span>
-          <span className="font-medium text-foreground">{quarterLabel}</span>
-        </nav>
 
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight md:text-4xl">Cashflow & P&L Report</h1>
-            <p className="mt-1 text-sm text-muted-foreground md:mt-2 md:text-base">
-              <span className="font-semibold text-foreground">{quarterLabel}</span>
-            </p>
+          <div className="flex items-center gap-3">
+            {quarterLabel && (
+              <>
+                <button
+                  onClick={goHome}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="hidden sm:inline">Home</span>
+                </button>
+                <span className="text-sm font-medium text-muted-foreground">{quarterLabel}</span>
+              </>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+            >
+              <Power className="h-4 w-4" />
+              <span className="hidden md:inline">Log out</span>
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 md:px-4"
-          >
-            <Power className="h-4 w-4" />
-            <span className="hidden md:inline">Log out</span>
-          </button>
         </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl p-4 md:p-8">
+        {/* Loading */}
+        {loadingQuarter && (
+          <div className="flex min-h-[60vh] items-center justify-center">
+            <p className="text-muted-foreground">Loading quarter...</p>
+          </div>
+        )}
+
+        {/* Quarter Selector */}
+        {!loadingQuarter && !selectedQuarter && (
+          <QuarterSelector onSelect={setSelectedQuarter} onLoadSaved={handleLoadSaved} />
+        )}
+
+        {/* Report */}
+        {!loadingQuarter && selectedQuarter && (
+          <div className="space-y-6">
+            {/* Page header */}
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight md:text-4xl">Cashflow & P&L Report</h1>
+              <p className="mt-1 text-sm text-muted-foreground md:mt-2">
+                <span className="font-semibold text-foreground">{quarterLabel}</span>
+              </p>
+            </div>
 
         {/* Step 2: Cash Sources Form */}
         {!cashSources ? (
@@ -236,6 +256,8 @@ export function App() {
               </div>
             )}
           </div>
+        )}
+        </div>
         )}
       </div>
     </div>
