@@ -33,8 +33,8 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
   // Get unique categories from transactions
   const categories = Array.from(new Set(transactions.map((t) => t.category))).sort()
 
-  // Filter transactions based on form values
-  const filteredTransactions = transactions.filter((t) => {
+  // Filter transactions based on form values (sorted latest first)
+  const filteredTransactions = [...transactions].sort((a, b) => b.date.localeCompare(a.date)).filter((t) => {
     const matchesSearch =
       !search ||
       t.description.toLowerCase().includes(search.toLowerCase()) ||
