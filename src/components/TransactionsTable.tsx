@@ -27,6 +27,9 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
   const [type, setType] = useState('all')
   const [category, setCategory] = useState('')
 
+  const handleTypeChange = (value: string | null) => setType(value ?? 'all')
+  const handleCategoryChange = (value: string | null) => setCategory(value ?? '')
+
   // Get unique categories from transactions
   const categories = Array.from(new Set(transactions.map((t) => t.category))).sort()
 
@@ -59,7 +62,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           />
 
-          <Select value={type} onValueChange={setType}>
+          <Select value={type} onValueChange={handleTypeChange}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -70,7 +73,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             </SelectContent>
           </Select>
 
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={handleCategoryChange}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>

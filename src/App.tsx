@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Wallet, CreditCard, Landmark, PiggyBank } from 'lucide-react'
 import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
 import { TransactionsTable } from '@/components/TransactionsTable'
@@ -13,6 +14,13 @@ import { calculatePLStatement } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
 import type { CashSource, Transaction } from '@/types/finance'
 
+const accountIcons: Record<string, React.ReactNode> = {
+  paypal: <Wallet className="h-5 w-5" />,
+  stripe: <CreditCard className="h-5 w-5" />,
+  commbank_transaction: <Landmark className="h-5 w-5" />,
+  commbank_saver: <PiggyBank className="h-5 w-5" />,
+}
+
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(import.meta.env.DEV)
   const [selectedQuarter, setSelectedQuarter] = useState<SelectedQuarter | null>(null)
@@ -20,13 +28,19 @@ export function App() {
   const [transactions, setTransactions] = useState<Transaction[] | null>(null)
   const [activeTab, setActiveTab] = useState<'current' | 'compare'>('current')
   const [loadingQuarter, setLoadingQuarter] = useState(false)
+  const [recategorizeMsg, setRecategorizeMsg] = useState<string | null>(null)
 
   const handleRecategorize = () => {
     if (!transactions) return
-    setTransactions(transactions.map((t) => ({
-      ...t,
-      category: categorizeTransaction(t.description),
-    })))
+    let changed = 0
+    const updated = transactions.map((t) => {
+      const newCategory = categorizeTransaction(t.description)
+      if (newCategory !== t.category) changed++
+      return { ...t, category: newCategory }
+    })
+    setTransactions(updated)
+    setRecategorizeMsg(changed > 0 ? `${changed} transaction${changed > 1 ? 's' : ''} updated` : 'No changes — categories already up to date')
+    setTimeout(() => setRecategorizeMsg(null), 4000)
   }
 
   if (!isLoggedIn) {
@@ -108,26 +122,21 @@ export function App() {
         ) : (
           <div className="space-y-6">
             {/* Cash Sources Summary */}
-            <div className="rounded-lg border bg-card p-4">
-              <h3 className="text-sm font-medium">Cash Sources Entered</h3>
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
-                {cashSources.map((source) => (
-                  <div key={source.id} className="rounded bg-muted p-3 text-xs space-y-1">
-                    <p className="font-medium text-foreground">{source.label}</p>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Opening:</span>
-                      <span className="font-semibold">${source.openingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Closing:</span>
-                      <span className="font-semibold">${source.closingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
-                    </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {cashSources.map((source) => (
+                <div key={source.id} className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
+                  <span className="text-muted-foreground">{accountIcons[source.id]}</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{source.label}</p>
+                    <p className="text-sm font-semibold">
+                      ${source.closingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
               <button
                 onClick={() => setCashSources(null)}
-                className="mt-3 text-xs text-primary hover:underline"
+                className="text-xs text-muted-foreground hover:underline"
               >
                 Edit
               </button>
@@ -182,7 +191,10 @@ export function App() {
                     {/* Current Quarter Tab */}
                     {activeTab === 'current' && (
                       <div className="grid gap-6">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex items-center justify-end gap-3">
+                          {recategorizeMsg && (
+                            <span className="text-sm text-muted-foreground">{recategorizeMsg}</span>
+                          )}
                           <button
                             onClick={handleRecategorize}
                             className="rounded-md border border-input px-4 py-2 text-sm font-medium hover:bg-muted"
