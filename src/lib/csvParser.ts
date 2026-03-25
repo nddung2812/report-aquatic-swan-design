@@ -2,7 +2,8 @@ import * as XLSX from 'xlsx'
 import type { Transaction } from '@/types/finance'
 
 const categoryKeywords: Record<string, string[]> = {
-  Sales: ['paypal', 'stripe', 'invoice', 'payment received', 'transfer in'],
+  'Sales - Shopify': ['paypal', 'stripe', 'shopify', 'invoice', 'payment received', 'transfer in'],
+  'Service - Operations': ['fast transfer from'],
   Payroll: ['payroll', 'salary', 'wages', 'wage', 'superannuation', 'super'],
   Marketing: ['facebook', 'google', 'ads', 'marketing', 'advertising'],
   Operations: ['rent', 'internet', 'office', 'supplies'],
