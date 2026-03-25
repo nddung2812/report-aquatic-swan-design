@@ -15,7 +15,8 @@ function buildSlices(transactions: Transaction[], type: 'income' | 'expense') {
   const totals: Record<string, number> = {}
   for (const t of transactions) {
     if (t.type !== type) continue
-    totals[t.category] = (totals[t.category] ?? 0) + t.amount
+    const label = type === 'expense' ? t.category.replace(/^Sales - /i, '') : t.category
+    totals[label] = (totals[label] ?? 0) + t.amount
   }
   return Object.entries(totals)
     .map(([name, value]) => ({ name, value: Math.round(value * 100) / 100 }))
