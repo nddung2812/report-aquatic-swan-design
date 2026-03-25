@@ -124,10 +124,11 @@ export function App() {
       setSelectedQuarter({ year, quarter })
       setLoadedQuarterId(id)
       setCashSources(data.cash_sources)
-      setTransactions(data.transactions.map((t: Transaction) => ({
+      const txns = data.transactions.map((t: Transaction) => ({
         ...t,
         category: categorizeTransaction(t.description),
-      })))
+      }))
+      setTransactions(txns.length > 0 ? txns : null)
       setActiveTab('current')
     } finally {
       setLoadingQuarter(false)
@@ -350,12 +351,45 @@ export function App() {
               <CsvUpload onUpload={async (txns) => {
                 const filtered = getTransactionsByQuarter(txns, selectedQuarter!.quarter, selectedQuarter!.year)
                 setTransactions(filtered)
-                if (loadedQuarterId) {
-                  await fetch(`/api/quarters/${loadedQuarterId}`, {
+
+                let quarterId = loadedQuarterId
+
+                // If no loaded quarter ID, check if one already exists in the DB
+                if (!quarterId) {
+                  const listRes = await fetch('/api/quarters')
+                  const list = await listRes.json()
+                  const match = list.find((q: { id: number; year: number; quarter: number }) =>
+                    q.year === selectedQuarter!.year && q.quarter === selectedQuarter!.quarter
+                  )
+                  if (match) {
+                    quarterId = match.id
+                    setLoadedQuarterId(match.id)
+                  }
+                }
+
+                if (quarterId) {
+                  await fetch(`/api/quarters/${quarterId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ transactions: filtered }),
+                    body: JSON.stringify({ transactions: filtered, cash_sources: cashSources }),
                   })
+                } else {
+                  const totalIncome = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+                  const totalExpenses = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+                  const res = await fetch('/api/quarters', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      label: `Q${selectedQuarter!.quarter} ${selectedQuarter!.year}`,
+                      year: selectedQuarter!.year,
+                      quarter: selectedQuarter!.quarter,
+                      cash_sources: cashSources,
+                      transactions: filtered,
+                      pl_summary: { totalIncome, totalExpenses, netProfit: totalIncome - totalExpenses, byCategory: [] },
+                    }),
+                  })
+                  const created = await res.json()
+                  setLoadedQuarterId(created.id)
                 }
               }} />
             ) : (
