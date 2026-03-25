@@ -71,7 +71,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                 <TableHead>Description</TableHead>
                 <TableHead>
                   <Select value={category} onValueChange={handleCategoryChange}>
-                    <SelectTrigger className="h-8 border-0 p-0 text-xs font-medium shadow-none focus:ring-0">
+                    <SelectTrigger className="h-8 border-0 p-0 text-sm font-medium text-foreground shadow-none focus:ring-0">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -84,7 +84,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
                 </TableHead>
                 <TableHead>
                   <Select value={type} onValueChange={handleTypeChange}>
-                    <SelectTrigger className="h-8 border-0 p-0 text-xs font-medium shadow-none focus:ring-0">
+                    <SelectTrigger className="h-8 border-0 p-0 text-sm font-medium text-foreground shadow-none focus:ring-0">
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
