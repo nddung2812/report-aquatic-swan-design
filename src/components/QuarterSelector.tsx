@@ -1,4 +1,4 @@
-import { FileBarChart2, ChevronRight } from 'lucide-react'
+import { FileBarChart2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'

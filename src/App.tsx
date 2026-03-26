@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Power, Home, BarChart3 } from 'lucide-react'
+import { Power, Home, BarChart3, CalendarDays } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SummaryCards } from '@/components/SummaryCards'
 import { CashflowChart } from '@/components/CashflowChart'
@@ -10,9 +10,11 @@ import { CashSourcesForm } from '@/components/CashSourcesForm'
 import { CsvUpload } from '@/components/CsvUpload'
 import { PLStatementComponent } from '@/components/PLStatement'
 import { BreakdownCharts } from '@/components/BreakdownCharts'
+import { RegularServiceView } from '@/components/RegularServiceView'
 import { calculatePLStatement, getTransactionsByQuarter } from '@/lib/finance'
 import { categorizeTransaction } from '@/lib/csvParser'
 import { accountLogos } from '@/lib/accountLogos'
+import { cn } from '@/lib/utils'
 import type { CashSource, Transaction } from '@/types/finance'
 
 export function App() {
@@ -48,6 +50,7 @@ export function App() {
   const [loadingQuarter, setLoadingQuarter] = useState(false)
   const [editingSourceId, setEditingSourceId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<{ opening: string; closing: string }>({ opening: '', closing: '' })
+  const [mainTab, setMainTab] = useState<'finance' | 'regularService'>('finance')
 
   // Auto-restore last-viewed quarter on page load
   useEffect(() => {
@@ -155,16 +158,37 @@ export function App() {
       {/* Global Nav */}
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
-          <button
-            onClick={goHome}
-            className="flex items-center gap-2 font-semibold hover:text-primary transition-colors"
-          >
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <span className="hidden sm:inline">Finance Report</span>
-          </button>
+          <nav className="flex items-center gap-1" aria-label="Main">
+            <button
+              type="button"
+              onClick={() => setMainTab('finance')}
+              className={cn(
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors',
+                mainTab === 'finance'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+              )}
+            >
+              <BarChart3 className="h-5 w-5 shrink-0 text-primary" />
+              <span className="hidden sm:inline">Finance Report</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMainTab('regularService')}
+              className={cn(
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors',
+                mainTab === 'regularService'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+              )}
+            >
+              <CalendarDays className="h-5 w-5 shrink-0 text-primary" />
+              <span className="hidden sm:inline">Regular Service</span>
+            </button>
+          </nav>
 
           <div className="flex items-center gap-3">
-            {quarterLabel && (
+            {mainTab === 'finance' && quarterLabel && (
               <>
                 <button
                   onClick={goHome}
@@ -188,6 +212,10 @@ export function App() {
       </header>
 
       <div className="mx-auto max-w-7xl p-4 md:p-8">
+        {mainTab === 'regularService' && <RegularServiceView />}
+
+        {mainTab === 'finance' && (
+        <>
         {/* Loading skeleton */}
         {loadingQuarter && (
           <div className="space-y-6">
@@ -405,6 +433,8 @@ export function App() {
           </div>
         )}
         </div>
+        )}
+        </>
         )}
       </div>
     </div>

@@ -103,6 +103,22 @@ async function migrate() {
       );
     `)
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS service_customer_schedule (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER NOT NULL REFERENCES service_customers(id) ON DELETE CASCADE,
+        sort_order INTEGER NOT NULL,
+        visit_date DATE NOT NULL,
+        month_label VARCHAR(32) NOT NULL,
+        status VARCHAR(32),
+        UNIQUE (customer_id, sort_order)
+      );
+    `)
+
+    await pool.query(`
+      UPDATE service_customer_schedule SET status = 'not_yet' WHERE status IS NULL;
+    `)
+
     console.log('✓ Tables created successfully')
     await pool.end()
   } catch (error) {

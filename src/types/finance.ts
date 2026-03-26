@@ -26,6 +26,16 @@ export interface PLStatement {
   }>
 }
 
+export type ServiceLineStatus = 'done' | 'not_yet' | 'soon' | 'free_service'
+
+export interface ServiceScheduleLine {
+  id: number
+  sort_order: number
+  visit_date: string
+  month_label: string
+  status: ServiceLineStatus
+}
+
 export interface ServiceCustomer {
   id: number
   name: string
@@ -34,6 +44,7 @@ export interface ServiceCustomer {
   last_service: string | null
   next_service: string | null
   notes: string
+  schedule?: ServiceScheduleLine[]
 }
 
 export interface QuarterRecord {
