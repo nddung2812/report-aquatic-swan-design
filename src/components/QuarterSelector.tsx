@@ -25,6 +25,7 @@ interface SavedQuarterSummary {
   quarter: number
   created_at: string
   pl_summary: { totalIncome: number; totalExpenses: number; netProfit: number }
+  cashChange: number
 }
 
 interface QuarterSelectorProps {
@@ -67,8 +68,8 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
       <div className="mx-auto w-full max-w-5xl">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_340px]">
 
-          {/* Left: Saved quarters list */}
-          <div className="space-y-3">
+          {/* Left: Saved quarters grid */}
+          <div className="grid grid-cols-2 gap-3 content-start">
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading saved quarters...</p>
             )}
@@ -79,25 +80,27 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
               <button
                 key={q.id}
                 onClick={() => onLoadSaved(q.id, q.year, q.quarter)}
-                className="group w-full cursor-pointer rounded-lg border bg-background px-4 py-4 text-left transition-all hover:border-primary hover:bg-primary/5 hover:shadow-sm"
+                className="group w-full cursor-pointer rounded-lg border bg-background px-3 py-2.5 text-left transition-all hover:border-primary hover:bg-primary/5 hover:shadow-sm"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <FileBarChart2 className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold">{q.label}</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-semibold ${q.pl_summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {q.pl_summary.netProfit >= 0 ? '+' : ''}${q.pl_summary.netProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                        </span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                <div className="flex items-start justify-between gap-1">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <FileBarChart2 className="h-3.5 w-3.5" />
                       </div>
+                      <span className="text-sm font-semibold">{q.label}</span>
                     </div>
-                    <div className="mt-0.5 flex gap-4 text-xs text-muted-foreground">
-                      <span>Income: ${q.pl_summary.totalIncome.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
-                      <span>Expenses: ${q.pl_summary.totalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                    <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+                      <span>In: ${q.pl_summary.totalIncome.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                      <span>Ex: ${q.pl_summary.totalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-sm font-semibold ${q.pl_summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {q.pl_summary.netProfit >= 0 ? '+' : ''}${q.pl_summary.netProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className={`text-xs ${q.cashChange >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                      {q.cashChange >= 0 ? '+' : ''}${q.cashChange.toLocaleString('en-US', { maximumFractionDigits: 0 })} cash
                     </div>
                   </div>
                 </div>

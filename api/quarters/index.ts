@@ -44,9 +44,13 @@ async function handleGet(res: VercelResponse) {
     `
     SELECT
       q.id, q.label, q.year, q.quarter, q.created_at,
-      pl.total_income, pl.total_expenses, pl.net_profit
+      pl.total_income, pl.total_expenses, pl.net_profit,
+      COALESCE(SUM(cs.opening_balance), 0) AS total_opening,
+      COALESCE(SUM(cs.closing_balance), 0) AS total_closing
     FROM quarters q
     LEFT JOIN pl_summaries pl ON q.id = pl.quarter_id
+    LEFT JOIN cash_sources cs ON q.id = cs.quarter_id
+    GROUP BY q.id, q.label, q.year, q.quarter, q.created_at, pl.total_income, pl.total_expenses, pl.net_profit
     ORDER BY q.year DESC, q.quarter DESC
     `
   )
@@ -62,6 +66,7 @@ async function handleGet(res: VercelResponse) {
       totalExpenses: parseFloat(row.total_expenses || '0'),
       netProfit: parseFloat(row.net_profit || '0'),
     },
+    cashChange: parseFloat(row.total_closing || '0') - parseFloat(row.total_opening || '0'),
   }))
 
   return res.status(200).json(quarters)
