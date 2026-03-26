@@ -60,7 +60,7 @@ export function PLStatementComponent({ statement }: PLStatementProps) {
                   : 'bg-orange-50 dark:bg-orange-950'
               }`}
             >
-              <p className="text-sm text-muted-foreground">Net Cashflow</p>
+              <p className="text-sm text-muted-foreground">Net Profit/Loss</p>
               <p
                 className={`mt-2 text-2xl font-bold ${
                   statement.netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'

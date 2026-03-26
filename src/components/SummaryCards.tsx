@@ -93,7 +93,7 @@ export function SummaryCards({ cashSources, transactions }: SummaryCardsProps) {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Net Cashflow</CardTitle>
+          <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
           <div className={`text-lg ${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
             {netProfit >= 0 ? '✓' : '✗'}
           </div>

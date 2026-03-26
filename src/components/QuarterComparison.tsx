@@ -136,7 +136,7 @@ export function QuarterComparison() {
                 <Legend />
                 <Bar dataKey="income" name="Income" fill="#10b981" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="profit" name="Net Cashflow" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="profit" name="Net Profit" fill="#3b82f6" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -180,7 +180,7 @@ export function QuarterComparison() {
                   <th className="px-4 py-3 text-left font-medium">Quarter</th>
                   <th className="px-4 py-3 text-right font-medium">Income</th>
                   <th className="px-4 py-3 text-right font-medium">Expenses</th>
-                  <th className="px-4 py-3 text-right font-medium">Net Cashflow</th>
+                  <th className="px-4 py-3 text-right font-medium">Net Profit</th>
                   <th className="px-4 py-3 text-right font-medium">Opening Cash</th>
                   <th className="px-4 py-3 text-right font-medium">Closing Cash</th>
                   <th className="px-4 py-3 text-right font-medium">Cash Change</th>
