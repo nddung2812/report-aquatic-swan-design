@@ -26,6 +26,16 @@ export interface PLStatement {
   }>
 }
 
+export interface ServiceCustomer {
+  id: number
+  name: string
+  service_description: string
+  frequency: 'Monthly' | 'Bi-Monthly' | 'Quarterly' | 'Bi-Annually' | 'Annually'
+  last_service: string | null
+  next_service: string | null
+  notes: string
+}
+
 export interface QuarterRecord {
   id: number
   label: string

@@ -390,6 +390,14 @@ export function App() {
                       statement={calculatePLStatement(transactions)}
                     />
                     <TransactionsTable transactions={transactions} onCategoryChange={handleCategoryChange} />
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => setTransactions(null)}
+                        className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                      >
+                        Re-upload CSV
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

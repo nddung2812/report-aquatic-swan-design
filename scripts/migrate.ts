@@ -90,6 +90,19 @@ async function migrate() {
       );
     `)
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS service_customers (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        service_description TEXT,
+        frequency VARCHAR(50) NOT NULL,
+        last_service DATE,
+        next_service DATE,
+        notes TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `)
+
     console.log('✓ Tables created successfully')
     await pool.end()
   } catch (error) {

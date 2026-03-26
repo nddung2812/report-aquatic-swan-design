@@ -62,10 +62,18 @@ export function parseCommBankCSV(csvText: string): Transaction[] {
     throw new Error("CSV is empty or invalid");
   }
 
-  // Skip header row
+  // Auto-detect if first row is a header (CommBank exports have no header)
+  let startRow = 0;
+  try {
+    const firstFields = parseCSVLine(lines[0].trim());
+    parseDate(firstFields[0]);
+  } catch {
+    startRow = 1;
+  }
+
   const transactions: Transaction[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = startRow; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
 
