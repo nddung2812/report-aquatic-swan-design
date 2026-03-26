@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Table,
   TableBody,
@@ -19,6 +19,15 @@ import {
 import { ALL_CATEGORIES } from '@/lib/csvParser'
 import type { Transaction } from '@/types/finance'
 
+const HIGHLIGHTS_KEY = 'txn_highlights'
+
+function loadHighlights(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(HIGHLIGHTS_KEY) || '{}')
+  } catch {
+    return {}
+  }
+}
 
 interface TransactionsTableProps {
   transactions: Transaction[]
@@ -29,6 +38,34 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [category, setCategory] = useState('')
+  const [highlights, setHighlights] = useState<Record<string, string>>(loadHighlights)
+  const [openId, setOpenId] = useState<string | null>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    localStorage.setItem(HIGHLIGHTS_KEY, JSON.stringify(highlights))
+  }, [highlights])
+
+  useEffect(() => {
+    if (!openId) return
+    const handler = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setOpenId(null)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [openId])
+
+  const setHighlight = (id: string, color: string) => {
+    setHighlights(prev => {
+      const next = { ...prev }
+      if (color) next[id] = color
+      else delete next[id]
+      return next
+    })
+    setOpenId(null)
+  }
 
   const handleTypeChange = (value: string | null) => setType(value ?? '')
   const handleCategoryChange = (value: string | null) => setCategory(value ?? '')
@@ -46,6 +83,11 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
       const matchesCategory = !category || t.category === category
       return matchesSearch && matchesType && matchesCategory
     })
+
+  const rowBg: Record<string, string> = {
+    red: 'bg-red-50 dark:bg-red-950/40',
+    yellow: 'bg-yellow-50 dark:bg-yellow-950/40',
+  }
 
   return (
     <Card className="col-span-full">
@@ -67,6 +109,7 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8"></TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>
@@ -100,44 +143,81 @@ export function TransactionsTable({ transactions, onCategoryChange }: Transactio
             </TableHeader>
             <TableBody>
               {filteredTransactions.length > 0 ? (
-                filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="text-sm">
-                      {new Date(transaction.date).toLocaleDateString('en-AU')}
-                    </TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>
-                      <select
-                        value={transaction.category}
-                        onChange={(e) => onCategoryChange?.(transaction.id, e.target.value)}
-                        className="rounded border border-input bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                      >
-                        {ALL_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {transaction.type === 'expense' ? cat.replace(/^Sales - /i, '') : cat}
-                          </option>
-                        ))}
-                      </select>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={transaction.type === 'income' ? 'default' : 'destructive'}>
-                        {transaction.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-                        {transaction.type === 'income' ? '+' : '-'}$
-                        {transaction.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${transaction.balance.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredTransactions.map((transaction) => {
+                  const hl = highlights[transaction.id]
+                  return (
+                    <TableRow key={transaction.id} className={rowBg[hl] ?? ''}>
+                      <TableCell className="pr-0">
+                        <div className="relative" ref={openId === transaction.id ? popoverRef : null}>
+                          <button
+                            onClick={() => setOpenId(openId === transaction.id ? null : transaction.id)}
+                            className={`h-4 w-4 rounded-full border transition-transform hover:scale-110 ${
+                              hl === 'red' ? 'bg-red-400 border-red-500' :
+                              hl === 'yellow' ? 'bg-yellow-300 border-yellow-400' :
+                              'border-dashed border-muted-foreground/40 bg-transparent'
+                            }`}
+                            title="Highlight row"
+                          />
+                          {openId === transaction.id && (
+                            <div className="absolute left-0 top-5 z-20 flex gap-1.5 rounded-md border bg-background p-2 shadow-md">
+                              <button
+                                onClick={() => setHighlight(transaction.id, 'red')}
+                                className="h-5 w-5 rounded-full bg-red-400 hover:scale-110 transition-transform"
+                                title="Red"
+                              />
+                              <button
+                                onClick={() => setHighlight(transaction.id, 'yellow')}
+                                className="h-5 w-5 rounded-full bg-yellow-300 hover:scale-110 transition-transform"
+                                title="Yellow"
+                              />
+                              <button
+                                onClick={() => setHighlight(transaction.id, '')}
+                                className="h-5 w-5 rounded-full border border-input bg-muted text-xs leading-none hover:scale-110 transition-transform flex items-center justify-center"
+                                title="Clear"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {new Date(transaction.date).toLocaleDateString('en-AU')}
+                      </TableCell>
+                      <TableCell>{transaction.description}</TableCell>
+                      <TableCell>
+                        <select
+                          value={transaction.category}
+                          onChange={(e) => onCategoryChange?.(transaction.id, e.target.value)}
+                          className="rounded border border-input bg-background px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        >
+                          {ALL_CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {transaction.type === 'expense' ? cat.replace(/^Sales - /i, '') : cat}
+                            </option>
+                          ))}
+                        </select>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={transaction.type === 'income' ? 'default' : 'destructive'}>
+                          {transaction.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        <span className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
+                          {transaction.type === 'income' ? '+' : '-'}$
+                          {transaction.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${transaction.balance.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No transactions found
                   </TableCell>
                 </TableRow>
