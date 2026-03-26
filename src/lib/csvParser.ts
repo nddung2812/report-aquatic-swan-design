@@ -26,8 +26,8 @@ const categoryKeywords: Record<string, string[]> = {
     "icon water",
     "sewerage",
   ],
-  "Purchase Stock": [],
-  "Purchase Equipment": [],
+  "Purchase - Stock": [],
+  "Purchase - Equipment": [],
   "Tax/Govt Charges": ["ato", "tax", "gst", "bpay"],
   Postage: [
     "australia post",
