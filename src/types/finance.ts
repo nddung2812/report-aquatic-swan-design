@@ -36,15 +36,30 @@ export interface ServiceScheduleLine {
   status: ServiceLineStatus
 }
 
-export interface ServiceCustomer {
+export type ServiceFrequency =
+  | 'Monthly'
+  | 'Bi-Monthly'
+  | 'Quarterly'
+  | 'Bi-Annually'
+  | 'Annually'
+
+export interface ServiceLocation {
   id: number
-  name: string
+  customer_id: number
+  label: string
   service_description: string
-  frequency: 'Monthly' | 'Bi-Monthly' | 'Quarterly' | 'Bi-Annually' | 'Annually'
+  frequency: ServiceFrequency
   last_service: string | null
   next_service: string | null
   notes: string
   schedule?: ServiceScheduleLine[]
+}
+
+export interface ServiceCustomer {
+  id: number
+  name: string
+  notes: string
+  locations: ServiceLocation[]
 }
 
 export interface QuarterRecord {
