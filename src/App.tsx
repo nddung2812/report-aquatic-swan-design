@@ -49,30 +49,6 @@ export function App() {
   const [editingSourceId, setEditingSourceId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<{ opening: string; closing: string }>({ opening: '', closing: '' })
 
-  if (!isLoggedIn) {
-    return <LoginPage onLogin={handleLogin} />
-  }
-
-  const handleLoadSaved = async (id: number, year: number, quarter: number) => {
-    setLoadingQuarter(true)
-    try {
-      const response = await fetch(`/api/quarters/${id}`)
-      if (!response.ok) throw new Error('Failed to load quarter')
-      const data = await response.json()
-      setSelectedQuarter({ year, quarter })
-      setLoadedQuarterId(id)
-      setCashSources(data.cash_sources)
-      const txns = data.transactions.map((t: Transaction) => ({
-        ...t,
-        category: t.category || categorizeTransaction(t.description),
-      }))
-      setTransactions(txns.length > 0 ? txns : null)
-      localStorage.setItem(LAST_QUARTER_KEY, String(id))
-    } finally {
-      setLoadingQuarter(false)
-    }
-  }
-
   // Auto-restore last-viewed quarter on page load
   useEffect(() => {
     if (!isLoggedIn) return
@@ -98,6 +74,30 @@ export function App() {
       .finally(() => setLoadingQuarter(false))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn])
+
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLogin} />
+  }
+
+  const handleLoadSaved = async (id: number, year: number, quarter: number) => {
+    setLoadingQuarter(true)
+    try {
+      const response = await fetch(`/api/quarters/${id}`)
+      if (!response.ok) throw new Error('Failed to load quarter')
+      const data = await response.json()
+      setSelectedQuarter({ year, quarter })
+      setLoadedQuarterId(id)
+      setCashSources(data.cash_sources)
+      const txns = data.transactions.map((t: Transaction) => ({
+        ...t,
+        category: t.category || categorizeTransaction(t.description),
+      }))
+      setTransactions(txns.length > 0 ? txns : null)
+      localStorage.setItem(LAST_QUARTER_KEY, String(id))
+    } finally {
+      setLoadingQuarter(false)
+    }
+  }
 
   const goHome = () => {
     setSelectedQuarter(null)
