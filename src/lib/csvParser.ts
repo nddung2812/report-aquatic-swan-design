@@ -206,12 +206,12 @@ export function parseExcelFile(arrayBuffer: ArrayBuffer): Transaction[] {
 
   const transactions: Transaction[] = [];
 
-  // Check if first row is a header by seeing if first column is a date/number
+  // Auto-detect if first row is a header using parseDate
   let startRow = 0;
   if (rows.length > 0 && rows[0]) {
-    const firstVal = rows[0][0];
-    // If first value looks like a string header (not a number/date), skip it
-    if (typeof firstVal === "string" && isNaN(Number(firstVal))) {
+    try {
+      parseDate(rows[0][0] as string | number);
+    } catch {
       startRow = 1;
     }
   }
