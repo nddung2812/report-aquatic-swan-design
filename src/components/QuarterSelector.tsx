@@ -24,7 +24,7 @@ interface SavedQuarterSummary {
   year: number
   quarter: number
   created_at: string
-  pl_summary: { totalIncome: number; totalExpenses: number; netCashflow: number }
+  pl_summary: { totalIncome: number; totalExpenses: number; netProfit: number }
 }
 
 interface QuarterSelectorProps {
@@ -89,8 +89,8 @@ export function QuarterSelector({ onSelect, onLoadSaved }: QuarterSelectorProps)
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">{q.label}</span>
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-semibold ${q.pl_summary.netCashflow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {q.pl_summary.netCashflow >= 0 ? '+' : ''}${q.pl_summary.netCashflow.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                        <span className={`text-sm font-semibold ${q.pl_summary.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {q.pl_summary.netProfit >= 0 ? '+' : ''}${q.pl_summary.netProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                         </span>
                         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                       </div>

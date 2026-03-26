@@ -20,7 +20,7 @@ export function SummaryCards({ cashSources, transactions }: SummaryCardsProps) {
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0)
 
-  const netCashflow = totalIncome - totalExpenses
+  const netProfit = totalIncome - totalExpenses
 
   return (
     <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
@@ -94,17 +94,17 @@ export function SummaryCards({ cashSources, transactions }: SummaryCardsProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Net Cashflow</CardTitle>
-          <div className={`text-lg ${netCashflow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-            {netCashflow >= 0 ? '✓' : '✗'}
+          <div className={`text-lg ${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+            {netProfit >= 0 ? '✓' : '✗'}
           </div>
         </CardHeader>
         <CardContent>
           <div
             className={`text-lg font-bold ${
-              netCashflow >= 0 ? 'text-blue-600' : 'text-orange-600'
+              netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'
             }`}
           >
-            {netCashflow >= 0 ? '+' : ''}${netCashflow.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            {netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
           </div>
           <p className="text-xs text-muted-foreground">Income - Expenses</p>
         </CardContent>

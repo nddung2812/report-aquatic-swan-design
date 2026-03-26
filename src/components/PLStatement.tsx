@@ -55,7 +55,7 @@ export function PLStatementComponent({ statement }: PLStatementProps) {
             </div>
             <div
               className={`rounded-lg p-4 ${
-                statement.netCashflow >= 0
+                statement.netProfit >= 0
                   ? 'bg-blue-50 dark:bg-blue-950'
                   : 'bg-orange-50 dark:bg-orange-950'
               }`}
@@ -63,11 +63,11 @@ export function PLStatementComponent({ statement }: PLStatementProps) {
               <p className="text-sm text-muted-foreground">Net Cashflow</p>
               <p
                 className={`mt-2 text-2xl font-bold ${
-                  statement.netCashflow >= 0 ? 'text-blue-600' : 'text-orange-600'
+                  statement.netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'
                 }`}
               >
-                {statement.netCashflow >= 0 ? '+' : '-'}$
-                {Math.abs(statement.netCashflow).toLocaleString('en-US', {
+                {statement.netProfit >= 0 ? '+' : '-'}$
+                {Math.abs(statement.netProfit).toLocaleString('en-US', {
                   maximumFractionDigits: 2,
                 })}
               </p>

@@ -60,7 +60,7 @@ async function handleGet(res: VercelResponse) {
     pl_summary: {
       totalIncome: parseFloat(row.total_income || '0'),
       totalExpenses: parseFloat(row.total_expenses || '0'),
-      netCashflow: parseFloat(row.net_profit || '0'),
+      netProfit: parseFloat(row.net_profit || '0'),
     },
   }))
 
@@ -105,7 +105,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     // Insert P&L summary
     await query(
       'INSERT INTO pl_summaries (quarter_id, total_income, total_expenses, net_profit) VALUES ($1, $2, $3, $4)',
-      [quarterId, pl_summary.totalIncome, pl_summary.totalExpenses, pl_summary.netCashflow]
+      [quarterId, pl_summary.totalIncome, pl_summary.totalExpenses, pl_summary.netProfit]
     )
 
     await query('COMMIT')

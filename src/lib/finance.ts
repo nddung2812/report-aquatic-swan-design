@@ -29,7 +29,7 @@ export function calculatePLStatement(transactions: Transaction[]): PLStatement {
   return {
     totalIncome,
     totalExpenses,
-    netCashflow: totalIncome - totalExpenses,
+    netProfit: totalIncome - totalExpenses,
     byCategory: categorized,
   }
 }

@@ -18,7 +18,7 @@ export interface Transaction {
 export interface PLStatement {
   totalIncome: number
   totalExpenses: number
-  netCashflow: number
+  netProfit: number
   byCategory: Array<{
     category: string
     amount: number

@@ -85,7 +85,7 @@ async function handleGet(quarterId: number, res: VercelResponse) {
   const plSummary: PLStatement = {
     totalIncome: pl ? parseFloat(pl.total_income) : 0,
     totalExpenses: pl ? parseFloat(pl.total_expenses) : 0,
-    netCashflow: pl ? parseFloat(pl.net_profit) : 0,
+    netProfit: pl ? parseFloat(pl.net_profit) : 0,
     byCategory: [],
   }
 

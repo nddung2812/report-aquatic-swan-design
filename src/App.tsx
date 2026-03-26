@@ -370,7 +370,7 @@ export function App() {
                       quarter: selectedQuarter!.quarter,
                       cash_sources: cashSources,
                       transactions: filtered,
-                      pl_summary: { totalIncome, totalExpenses, netCashflow: totalIncome - totalExpenses, byCategory: [] },
+                      pl_summary: { totalIncome, totalExpenses, netProfit: totalIncome - totalExpenses, byCategory: [] },
                     }),
                   })
                   const created = await res.json()
