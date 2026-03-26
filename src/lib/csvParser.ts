@@ -28,6 +28,7 @@ const categoryKeywords: Record<string, string[]> = {
   ],
   "Purchase - Stock": [],
   "Purchase - Equipment": [],
+  "Purchase - General": [],
   "Transfer - Saving": [],
   "Tax/Govt Charges": ["ato", "tax", "gst", "bpay"],
   Postage: [
