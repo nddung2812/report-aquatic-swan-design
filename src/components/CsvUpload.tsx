@@ -29,18 +29,15 @@ export function CsvUpload({ onUpload }: CsvUploadProps) {
       try {
         let transactions: Transaction[]
         const arrayBuffer = e.target?.result as ArrayBuffer
+        const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
 
-        // Try to parse as Excel first (handles .xlsx, .xls, and Excel files with .csv extension)
-        try {
-          console.log('Attempting Excel parse...')
+        if (isExcel) {
           transactions = parseExcelFile(arrayBuffer)
-          console.log('Successfully parsed as Excel:', transactions.length)
-        } catch (excelErr) {
-          // If Excel parse fails, try as CSV
-          console.log('Excel parse failed, trying CSV...', excelErr)
+        } else {
+          // Use plain CSV parser for .csv files — XLSX misreads DD/MM/YYYY dates
+          // where day ≤ 12 as MM/DD/YYYY, putting them in the wrong quarter
           const csvText = new TextDecoder().decode(arrayBuffer)
           transactions = parseCommBankCSV(csvText)
-          console.log('Successfully parsed as CSV:', transactions.length)
         }
 
         console.log('Parsed transactions:', transactions.length)
