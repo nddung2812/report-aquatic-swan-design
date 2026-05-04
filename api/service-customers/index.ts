@@ -28,52 +28,61 @@ function formatPgDateStr(d: unknown): string {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method === 'GET') {
-      const custResult = await query(
-        `SELECT id, name, COALESCE(notes, '') AS notes
-         FROM service_customers
-         ORDER BY LOWER(name) ASC`
-      )
-      const rows = custResult.rows as any[]
-      const customers: any[] = []
-      for (const row of rows) {
-        const locResult = await query(
+      const [custResult, locResult, schedResult] = await Promise.all([
+        query(
+          `SELECT id, name, COALESCE(notes, '') AS notes
+           FROM service_customers
+           ORDER BY LOWER(name) ASC`
+        ),
+        query(
           `SELECT id, customer_id, label, service_description, frequency, last_service, next_service, notes, sort_order
-           FROM service_locations WHERE customer_id = $1 ORDER BY sort_order, id`,
-          [row.id]
-        )
-        const locations: any[] = []
-        for (const loc of locResult.rows as any[]) {
-          const sched = await query(
-            `SELECT id, sort_order, visit_date, month_label, status
-             FROM service_customer_schedule WHERE location_id = $1 ORDER BY sort_order`,
-            [loc.id]
-          )
-          const schedule = (sched.rows as any[]).map((s) => ({
-            id: s.id,
-            sort_order: s.sort_order,
-            visit_date: formatPgDateStr(s.visit_date),
-            month_label: s.month_label,
-            status: normalizeLineStatus(s.status),
-          }))
-          locations.push({
-            id: loc.id,
-            customer_id: loc.customer_id,
-            label: loc.label,
-            service_description: loc.service_description ?? '',
-            frequency: normalizeFrequency(loc.frequency),
-            last_service: formatPgDate(loc.last_service),
-            next_service: formatPgDate(loc.next_service),
-            notes: loc.notes ?? '',
-            schedule,
-          })
-        }
-        customers.push({
-          id: row.id,
-          name: row.name,
-          notes: row.notes ?? '',
-          locations,
+           FROM service_locations
+           ORDER BY customer_id, sort_order, id`
+        ),
+        query(
+          `SELECT id, location_id, sort_order, visit_date, month_label, status
+           FROM service_customer_schedule
+           ORDER BY location_id, sort_order`
+        ),
+      ])
+
+      const scheduleByLocation = new Map<number, any[]>()
+      for (const s of schedResult.rows as any[]) {
+        const list = scheduleByLocation.get(s.location_id) ?? []
+        list.push({
+          id: s.id,
+          sort_order: s.sort_order,
+          visit_date: formatPgDateStr(s.visit_date),
+          month_label: s.month_label,
+          status: normalizeLineStatus(s.status),
         })
+        if (list.length === 1) scheduleByLocation.set(s.location_id, list)
       }
+
+      const locationsByCustomer = new Map<number, any[]>()
+      for (const loc of locResult.rows as any[]) {
+        const list = locationsByCustomer.get(loc.customer_id) ?? []
+        list.push({
+          id: loc.id,
+          customer_id: loc.customer_id,
+          label: loc.label,
+          service_description: loc.service_description ?? '',
+          frequency: normalizeFrequency(loc.frequency),
+          last_service: formatPgDate(loc.last_service),
+          next_service: formatPgDate(loc.next_service),
+          notes: loc.notes ?? '',
+          schedule: scheduleByLocation.get(loc.id) ?? [],
+        })
+        if (list.length === 1) locationsByCustomer.set(loc.customer_id, list)
+      }
+
+      const customers = (custResult.rows as any[]).map((row) => ({
+        id: row.id,
+        name: row.name,
+        notes: row.notes ?? '',
+        locations: locationsByCustomer.get(row.id) ?? [],
+      }))
+
       return res.status(200).json(customers)
     }
 

@@ -199,6 +199,15 @@ async function migrate() {
       console.log('✓ Migrated service_customers → service_locations')
     }
 
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_service_locations_customer_id
+        ON service_locations(customer_id);
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_service_customer_schedule_location_id
+        ON service_customer_schedule(location_id);
+    `)
+
     console.log('✓ Tables created successfully')
     await pool.end()
   } catch (error) {

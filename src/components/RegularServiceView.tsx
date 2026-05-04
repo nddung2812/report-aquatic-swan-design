@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -24,7 +25,12 @@ import {
 import { badgeVariants } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { regularServiceDialogSchema, serviceFrequencyValues } from '@/lib/schemas'
-import type { ServiceCustomer, ServiceLineStatus, ServiceLocation } from '@/types/finance'
+import type {
+  ServiceCustomer,
+  ServiceLineStatus,
+  ServiceLocation,
+  ServiceScheduleLine,
+} from '@/types/finance'
 import { cn } from '@/lib/utils'
 
 type DialogFormValues = import('@/lib/schemas').RegularServiceDialogInput
@@ -40,6 +46,90 @@ const emptyDefaults: DialogFormValues = {
   notes: '',
 }
 
+const STATUS_MENU_GAP = 6
+const VIEWPORT_PAD = 8
+
+function FloatingScheduleStatusMenu({
+  anchorEl,
+  line,
+  options,
+  onSelect,
+}: {
+  anchorEl: HTMLElement
+  line: ServiceScheduleLine
+  options: { value: ServiceLineStatus; label: string }[]
+  onSelect: (status: ServiceLineStatus) => void
+}) {
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [style, setStyle] = useState<CSSProperties>({})
+
+  useLayoutEffect(() => {
+    const menu = menuRef.current
+    if (!anchorEl || !menu) return
+
+    const update = () => {
+      const r = anchorEl.getBoundingClientRect()
+      const mw = menu.offsetWidth
+      const mh = menu.offsetHeight
+      let top: number
+      const spaceBelow = window.innerHeight - r.bottom - STATUS_MENU_GAP - VIEWPORT_PAD
+      const spaceAbove = r.top - STATUS_MENU_GAP - VIEWPORT_PAD
+      if (spaceBelow >= mh || spaceBelow >= spaceAbove) {
+        top = Math.min(r.bottom + STATUS_MENU_GAP, window.innerHeight - VIEWPORT_PAD - mh)
+        top = Math.max(VIEWPORT_PAD, top)
+      } else {
+        top = Math.max(VIEWPORT_PAD, r.top - STATUS_MENU_GAP - mh)
+      }
+      let left = r.right - mw
+      left = Math.max(VIEWPORT_PAD, Math.min(left, window.innerWidth - VIEWPORT_PAD - mw))
+      setStyle({
+        position: 'fixed',
+        top,
+        left,
+        zIndex: 200,
+      })
+    }
+
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(menu)
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
+  }, [anchorEl])
+
+  return createPortal(
+    <div
+      ref={menuRef}
+      role="listbox"
+      style={style}
+      data-status-picker-menu
+      className="min-w-[10.5rem] rounded-lg border border-border bg-popover py-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
+    >
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          role="option"
+          aria-selected={line.status === opt.value}
+          className={cn(
+            'flex w-full px-3 py-2 text-left text-sm transition-colors hover:bg-muted',
+            line.status === opt.value && 'bg-muted/80 font-medium'
+          )}
+          onClick={() => onSelect(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>,
+    document.body
+  )
+}
+
 function scheduleStatusBadgeClass(status: ServiceLineStatus): string {
   if (status === 'done') {
     return 'border-green-600 bg-green-600 text-white hover:opacity-90 dark:border-green-600 dark:bg-green-700 dark:text-white'
@@ -48,6 +138,33 @@ function scheduleStatusBadgeClass(status: ServiceLineStatus): string {
     return 'border-amber-400 bg-amber-200 text-amber-950 hover:opacity-90 dark:border-amber-600 dark:bg-amber-800 dark:text-amber-50'
   }
   return ''
+}
+
+const SOON_WINDOW_DAYS = 7
+
+function todayIsoDate(): string {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function addDaysIso(iso: string, days: number): string {
+  const d = parseISO(iso)
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** Derive display status from stored status + visit date.
+ *  Stored 'not_yet' rows whose visit_date is on or before today+7d (including overdue) display as 'soon'.
+ *  All other statuses (done, soon, free_service) pass through unchanged. */
+function effectiveScheduleStatus(
+  stored: ServiceLineStatus,
+  visitDate: string,
+  soonCutoffIso: string
+): ServiceLineStatus {
+  if (stored !== 'not_yet') return stored
+  if (!visitDate) return stored
+  return visitDate <= soonCutoffIso ? 'soon' : stored
 }
 
 function toFormDefaults(customer: ServiceCustomer, location: ServiceLocation): DialogFormValues {
@@ -68,6 +185,7 @@ export function RegularServiceView() {
   const [dialog, setDialog] = useState<'add' | 'edit' | null>(null)
   const [editing, setEditing] = useState<{ customer: ServiceCustomer; location: ServiceLocation } | null>(null)
   const [statusPickerLineId, setStatusPickerLineId] = useState<number | null>(null)
+  const [pickerAnchorEl, setPickerAnchorEl] = useState<HTMLElement | null>(null)
   const [sidebarLocationId, setSidebarLocationId] = useState<number | null>(null)
 
   const { data: customers, isLoading } = useQuery({
@@ -78,6 +196,8 @@ export function RegularServiceView() {
       return res.json() as Promise<ServiceCustomer[]>
     },
   })
+
+  const soonCutoffIso = useMemo(() => addDaysIso(todayIsoDate(), SOON_WINDOW_DAYS), [])
 
   const flatRows = useMemo(() => {
     if (!customers) return []
@@ -233,17 +353,28 @@ export function RegularServiceView() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-customers'] })
       setStatusPickerLineId(null)
+      setPickerAnchorEl(null)
     },
   })
 
   useEffect(() => {
     if (statusPickerLineId === null) return
     const onDocMouseDown = (e: MouseEvent) => {
-      const open = document.querySelector('[data-status-picker="open"]')
-      if (open && !open.contains(e.target as Node)) setStatusPickerLineId(null)
+      const target = e.target as Node
+      const openWrap = document.querySelector('[data-status-picker="open"]')
+      const menuEl = document.querySelector('[data-status-picker-menu]')
+      const outsideAnchor = !openWrap?.contains(target)
+      const outsideMenu = !menuEl?.contains(target)
+      if (outsideAnchor && outsideMenu) {
+        setStatusPickerLineId(null)
+        setPickerAnchorEl(null)
+      }
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setStatusPickerLineId(null)
+      if (e.key === 'Escape') {
+        setStatusPickerLineId(null)
+        setPickerAnchorEl(null)
+      }
     }
     document.addEventListener('mousedown', onDocMouseDown)
     document.addEventListener('keydown', onKey)
@@ -259,6 +390,7 @@ export function RegularServiceView() {
       if (e.key === 'Escape') {
         setSidebarLocationId(null)
         setStatusPickerLineId(null)
+        setPickerAnchorEl(null)
       }
     }
     document.addEventListener('keydown', onKey)
@@ -271,6 +403,7 @@ export function RegularServiceView() {
     if (!exists) {
       setSidebarLocationId(null)
       setStatusPickerLineId(null)
+      setPickerAnchorEl(null)
     }
   }, [sidebarLocationId, customers])
 
@@ -282,6 +415,11 @@ export function RegularServiceView() {
     }
     return null
   }, [customers, sidebarLocationId])
+
+  const statusPickerLine = useMemo(() => {
+    if (statusPickerLineId === null || !sidebarContext?.location.schedule) return null
+    return sidebarContext.location.schedule.find((l) => l.id === statusPickerLineId) ?? null
+  }, [statusPickerLineId, sidebarContext])
 
   const onSubmit = (data: DialogFormValues) => {
     if (dialog === 'add') {
@@ -298,6 +436,7 @@ export function RegularServiceView() {
   const openAdd = () => {
     setSidebarLocationId(null)
     setStatusPickerLineId(null)
+    setPickerAnchorEl(null)
     setEditing(null)
     setDialog('add')
   }
@@ -305,18 +444,21 @@ export function RegularServiceView() {
   const openEdit = (customer: ServiceCustomer, location: ServiceLocation) => {
     setSidebarLocationId(null)
     setStatusPickerLineId(null)
+    setPickerAnchorEl(null)
     setEditing({ customer, location })
     setDialog('edit')
   }
 
   const openScheduleSidebar = (locationId: number) => {
     setStatusPickerLineId(null)
+    setPickerAnchorEl(null)
     setSidebarLocationId((id) => (id === locationId ? null : locationId))
   }
 
   const closeScheduleSidebar = () => {
     setSidebarLocationId(null)
     setStatusPickerLineId(null)
+    setPickerAnchorEl(null)
   }
 
   const closeDialog = () => {
@@ -490,70 +632,53 @@ export function RegularServiceView() {
                     <p className="text-sm text-muted-foreground">No scheduled visits yet.</p>
                   ) : (
                     <ul className="space-y-2 text-sm">
-                      {sidebarContext.location.schedule.map((line) => (
-                        <li
-                          key={line.id}
-                          className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/50 pb-2 last:border-0 last:pb-0"
-                        >
-                          <span className="min-w-[5rem] font-medium text-foreground">{line.month_label}</span>
-                          <span className="min-w-0 flex-1 text-muted-foreground">
-                            {format(parseISO(line.visit_date), 'EEEE, d MMMM yyyy')}
-                          </span>
-                          <div
-                            className="relative shrink-0"
-                            data-status-picker={statusPickerLineId === line.id ? 'open' : undefined}
+                      {sidebarContext.location.schedule.map((line) => {
+                        const displayStatus = effectiveScheduleStatus(line.status, line.visit_date, soonCutoffIso)
+                        const displayLabel =
+                          scheduleStatusOptions.find((o) => o.value === displayStatus)?.label ?? displayStatus
+                        return (
+                          <li
+                            key={line.id}
+                            className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border/50 pb-2 last:border-0 last:pb-0"
                           >
-                            <button
-                              type="button"
-                              className={cn(
-                                badgeVariants({ variant: 'outline' }),
-                                scheduleStatusBadgeClass(line.status),
-                                'h-6 min-h-6 cursor-pointer px-2.5 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50'
-                              )}
-                              onClick={() =>
-                                setStatusPickerLineId((id) => (id === line.id ? null : line.id))
-                              }
-                              disabled={
-                                updateScheduleStatusMutation.isPending &&
-                                updateScheduleStatusMutation.variables?.lineId === line.id
-                              }
-                              aria-expanded={statusPickerLineId === line.id}
-                              aria-haspopup="listbox"
-                              aria-label={`Status: ${scheduleStatusOptions.find((o) => o.value === line.status)?.label ?? line.status}. Change status`}
+                            <span className="min-w-[5rem] font-medium text-foreground">{line.month_label}</span>
+                            <span className="min-w-0 flex-1 text-muted-foreground">
+                              {format(parseISO(line.visit_date), 'EEEE, d MMMM yyyy')}
+                            </span>
+                            <div
+                              className="relative shrink-0"
+                              data-status-picker={statusPickerLineId === line.id ? 'open' : undefined}
                             >
-                              {scheduleStatusOptions.find((o) => o.value === line.status)?.label ??
-                                line.status}
-                            </button>
-                            {statusPickerLineId === line.id && (
-                              <div
-                                role="listbox"
-                                className="absolute bottom-full right-0 z-[100] mb-1 min-w-[10.5rem] rounded-lg border border-border bg-popover py-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
+                              <button
+                                type="button"
+                                className={cn(
+                                  badgeVariants({ variant: 'outline' }),
+                                  scheduleStatusBadgeClass(displayStatus),
+                                  'h-6 min-h-6 cursor-pointer px-2.5 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50'
+                                )}
+                                onClick={(ev) => {
+                                  if (statusPickerLineId === line.id) {
+                                    setStatusPickerLineId(null)
+                                    setPickerAnchorEl(null)
+                                  } else {
+                                    setStatusPickerLineId(line.id)
+                                    setPickerAnchorEl(ev.currentTarget)
+                                  }
+                                }}
+                                disabled={
+                                  updateScheduleStatusMutation.isPending &&
+                                  updateScheduleStatusMutation.variables?.lineId === line.id
+                                }
+                                aria-expanded={statusPickerLineId === line.id}
+                                aria-haspopup="listbox"
+                                aria-label={`Status: ${displayLabel}. Change status`}
                               >
-                                {scheduleStatusOptions.map((opt) => (
-                                  <button
-                                    key={opt.value}
-                                    type="button"
-                                    role="option"
-                                    aria-selected={line.status === opt.value}
-                                    className={cn(
-                                      'flex w-full px-3 py-2 text-left text-sm transition-colors hover:bg-muted',
-                                      line.status === opt.value && 'bg-muted/80 font-medium'
-                                    )}
-                                    onClick={() =>
-                                      updateScheduleStatusMutation.mutate({
-                                        lineId: line.id,
-                                        status: opt.value,
-                                      })
-                                    }
-                                  >
-                                    {opt.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                                {displayLabel}
+                              </button>
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </div>
@@ -579,6 +704,16 @@ export function RegularServiceView() {
               </>
             )}
           </aside>
+          {sidebarContext && statusPickerLine && pickerAnchorEl && (
+            <FloatingScheduleStatusMenu
+              anchorEl={pickerAnchorEl}
+              line={statusPickerLine}
+              options={scheduleStatusOptions}
+              onSelect={(status) =>
+                updateScheduleStatusMutation.mutate({ lineId: statusPickerLine.id, status })
+              }
+            />
+          )}
         </>
       )}
 
